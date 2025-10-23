@@ -22,6 +22,7 @@ import SearchAndFilters from '@/components/Books/SearchAndFilters';
 import EnhancedBookCard from '@/components/Books/EnhancedBookCard';
 import BookDetailModal from '@/components/Books/BookDetailModal';
 import BookFormModal from '@/components/Books/BookFormModal';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 type ViewMode = 'grid' | 'list' | 'analytics';
 
@@ -244,7 +245,8 @@ const BooksRevamped = () => {
   }
 
   return (
-    <div className="space-y-6 p-4 sm:p-6">
+    <ErrorBoundary>
+      <div className="space-y-6 p-4 sm:p-6">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -369,12 +371,13 @@ const BooksRevamped = () => {
         onClose={handleCloseModals}
       />
 
-      <BookFormModal
-        book={editingBook}
-        isOpen={isFormModalOpen}
-        onClose={handleCloseModals}
-      />
-    </div>
+        <BookFormModal
+          book={editingBook}
+          isOpen={isFormModalOpen}
+          onClose={handleCloseModals}
+        />
+      </div>
+    </ErrorBoundary>
   );
 };
 

@@ -39,7 +39,7 @@ const MonthlyPlan = () => {
     target: '',
     deadline: '',
     targetType: 'chapters',
-    targetAmount: 1,
+    targetAmount: 0,
     priority: 'Medium',
   });
 
@@ -119,7 +119,7 @@ const MonthlyPlan = () => {
       target: '', 
       deadline: '',
       targetType: 'chapters',
-      targetAmount: 1,
+      targetAmount: 0,
       priority: 'Medium',
     });
     setEditingPlan(null);
@@ -127,7 +127,15 @@ const MonthlyPlan = () => {
 
   const handleCreatePlan = async (planData: Partial<MonthlyPlanType>) => {
     try {
-      await dispatch(addMonthlyPlan(planData as any));
+      const validPlanData = {
+        subject: planData.subject || '',
+        target: planData.target || '',
+        deadline: planData.deadline || new Date().toISOString().split('T')[0],
+        targetType: planData.targetType || 'chapters',
+        targetAmount: planData.targetAmount || 1,
+        priority: planData.priority || 'Medium',
+      } as const;
+      await dispatch(addMonthlyPlan(validPlanData));
       toast({ title: 'Plan created successfully from template' });
     } catch (error) {
       toast({ variant: 'destructive', title: 'Failed to create plan' });
@@ -226,9 +234,10 @@ const MonthlyPlan = () => {
                     id="targetAmount"
                     type="number"
                     min="1"
-                    value={formData.targetAmount}
-                    onChange={(e) => setFormData({ ...formData, targetAmount: parseInt(e.target.value) || 1 })}
+                    value={formData.targetAmount || ''}
+                    onChange={(e) => setFormData({ ...formData, targetAmount: parseInt(e.target.value) || 0 })}
                     className="text-sm"
+                    placeholder="Enter target amount..."
                     required
                   />
                 </div>

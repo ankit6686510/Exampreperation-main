@@ -80,7 +80,7 @@ const BookFormModal = ({ book, isOpen, onClose }: BookFormModalProps) => {
         isbn: '',
         edition: '',
         publishedYear: new Date().getFullYear(),
-        totalChapters: 10,
+        totalChapters: 0,
         notes: '',
         priority: 'medium',
         tags: []
@@ -271,14 +271,24 @@ const BookFormModal = ({ book, isOpen, onClose }: BookFormModalProps) => {
                     id="totalChapters"
                     type="number"
                     min="1"
-                    max="100"
-                    value={formData.totalChapters}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      totalChapters: parseInt(e.target.value) || 1 
-                    }))}
+                    max="1000"
+                    value={formData.totalChapters || ''}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      if (isNaN(value) || value < 1) {
+                        setFormData(prev => ({ ...prev, totalChapters: 0 }));
+                      } else if (value > 1000) {
+                        setFormData(prev => ({ ...prev, totalChapters: 1000 }));
+                      } else {
+                        setFormData(prev => ({ ...prev, totalChapters: value }));
+                      }
+                    }}
+                    placeholder="Enter number of chapters..."
                     required
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Maximum 1000 chapters supported
+                  </p>
                 </div>
 
                 <div>
