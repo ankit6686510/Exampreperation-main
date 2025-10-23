@@ -51,7 +51,7 @@ const TestSubjectsPage = () => {
 
   // Test edge cases
   const runEdgeCaseTests = () => {
-    const edgeCases = [0, 1, 99, 100, 150, 200, 500, 1000];
+    const edgeCases = [0, 1, 99, 100, 150, 200];
     const books = edgeCases.map(count => 
       generateTestBook(count, `Book with ${count} chapters`)
     );
@@ -155,7 +155,7 @@ const TestSubjectsPage = () => {
                     onChange={(e) => setTestChapters(parseInt(e.target.value) || 0)}
                     placeholder="Enter number..."
                     min="0"
-                    max="1000"
+                    max="200"
                   />
                   <Button onClick={() => testSelectItems(testChapters)}>
                     Test
@@ -174,12 +174,12 @@ const TestSubjectsPage = () => {
                 <Label>Performance Test</Label>
                 <Button 
                   onClick={() => {
-                    setTestChapters(1000);
-                    testSelectItems(1000);
+                    setTestChapters(200);
+                    testSelectItems(200);
                   }} 
                   className="w-full"
                 >
-                  Test 1000 Chapters
+                  Test 200 Chapters
                 </Button>
               </div>
             </div>
@@ -308,7 +308,7 @@ const TestSubjectsPage = () => {
                 <ul className="text-sm space-y-1 text-muted-foreground">
                   <li>✅ Removed default "1" from Monthly Plan</li>
                   <li>✅ Fixed Select.Item empty value props</li>
-                  <li>✅ Increased chapter limit to 1000</li>
+                  <li>✅ Increased chapter limit to 200</li>
                   <li>✅ Added error boundaries</li>
                   <li>✅ Added performance optimizations</li>
                   <li>✅ Added input validation</li>
@@ -320,8 +320,8 @@ const TestSubjectsPage = () => {
                   Test Coverage
                 </h4>
                 <ul className="text-sm space-y-1 text-muted-foreground">
-                  <li>🧪 Edge cases: 0, 1, 99, 100, 150+ chapters</li>
-                  <li>🚀 Performance: Up to 1000 chapters</li>
+                  <li>🧪 Edge cases: 0, 1, 99, 100, 150, 200 chapters</li>
+                  <li>🚀 Performance: Up to 200 chapters</li>
                   <li>🛡️ Error handling with boundaries</li>
                   <li>📝 Input validation</li>
                   <li>🔍 Search and filtering</li>

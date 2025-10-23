@@ -52,7 +52,7 @@ const BookFormModal = ({ book, isOpen, onClose }: BookFormModalProps) => {
     isbn: '',
     edition: '',
     publishedYear: new Date().getFullYear(),
-    totalChapters: 10,
+    totalChapters: 0,
     notes: '',
     priority: 'medium' as 'low' | 'medium' | 'high',
     tags: [] as string[]
@@ -93,19 +93,62 @@ const BookFormModal = ({ book, isOpen, onClose }: BookFormModalProps) => {
     e.preventDefault();
     setIsLoading(true);
 
+    // Validate required fields
+    if (!formData.title.trim()) {
+      toast({ 
+        variant: 'destructive', 
+        title: 'Title is required' 
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    if (!formData.subject || formData.subject.trim() === '') {
+      toast({ 
+        variant: 'destructive', 
+        title: 'Subject is required' 
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    if (!formData.totalChapters || formData.totalChapters < 1) {
+      toast({ 
+        variant: 'destructive', 
+        title: 'Total chapters must be at least 1' 
+      });
+      setIsLoading(false);
+      return;
+    }
+
     try {
+      const submitData = {
+        ...formData,
+        title: formData.title.trim(),
+        subject: formData.subject.trim(),
+        author: formData.author?.trim() || '',
+        isbn: formData.isbn?.trim() || '',
+        edition: formData.edition?.trim() || '',
+        notes: formData.notes?.trim() || '',
+        totalChapters: Math.max(1, formData.totalChapters) // Ensure at least 1
+      };
+
+      console.log('Submitting book data:', submitData); // Debug log
+
       if (book) {
-        await dispatch(updateBook({ id: book.id, data: formData }));
+        await dispatch(updateBook({ id: book.id, data: submitData }));
         toast({ title: 'Book updated successfully' });
       } else {
-        await dispatch(addBook(formData));
+        await dispatch(addBook(submitData));
         toast({ title: 'Book added successfully' });
       }
       onClose();
     } catch (error) {
+      console.error('Book submission error:', error);
       toast({ 
         variant: 'destructive', 
-        title: book ? 'Failed to update book' : 'Failed to add book' 
+        title: book ? 'Failed to update book' : 'Failed to add book',
+        description: 'Please check all required fields and try again.'
       });
     } finally {
       setIsLoading(false);
@@ -211,7 +254,11 @@ const BookFormModal = ({ book, isOpen, onClose }: BookFormModalProps) => {
                   </Label>
                   <Select
                     value={formData.subject}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, subject: value }))}
+                    onValueChange={(value) => {
+                      console.log('Subject selected:', value); // Debug log
+                      setFormData(prev => ({ ...prev, subject: value || '' }));
+                    }}
+                    required
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select subject" />
@@ -271,14 +318,16 @@ const BookFormModal = ({ book, isOpen, onClose }: BookFormModalProps) => {
                     id="totalChapters"
                     type="number"
                     min="1"
-                    max="1000"
-                    value={formData.totalChapters || ''}
+                    max="200"
+                    value={formData.totalChapters === 0 ? '' : formData.totalChapters}
                     onChange={(e) => {
                       const value = parseInt(e.target.value);
-                      if (isNaN(value) || value < 1) {
+                      if (e.target.value === '' || isNaN(value)) {
                         setFormData(prev => ({ ...prev, totalChapters: 0 }));
-                      } else if (value > 1000) {
-                        setFormData(prev => ({ ...prev, totalChapters: 1000 }));
+                      } else if (value < 1) {
+                        setFormData(prev => ({ ...prev, totalChapters: 1 }));
+                      } else if (value > 200) {
+                        setFormData(prev => ({ ...prev, totalChapters: 200 }));
                       } else {
                         setFormData(prev => ({ ...prev, totalChapters: value }));
                       }
@@ -287,7 +336,7 @@ const BookFormModal = ({ book, isOpen, onClose }: BookFormModalProps) => {
                     required
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Maximum 1000 chapters supported
+                    Maximum 200 chapters supported
                   </p>
                 </div>
 

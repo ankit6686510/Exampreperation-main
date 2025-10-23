@@ -182,14 +182,14 @@ const SearchAndFilters = ({
           {/* Subject Filter - Only if needed */}
           {uniqueSubjects.length > 1 && (
             <Select
-              value={filters.subject}
-              onValueChange={(value) => handleFilterChange('subject', value)}
+              value={filters.subject || "all_subjects"}
+              onValueChange={(value) => handleFilterChange('subject', value === "all_subjects" ? "" : value)}
             >
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="All Subjects" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Subjects</SelectItem>
+                <SelectItem value="all_subjects">All Subjects</SelectItem>
                 {uniqueSubjects.map((subject) => (
                   <SelectItem key={subject} value={subject}>
                     {subject}
