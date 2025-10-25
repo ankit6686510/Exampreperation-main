@@ -17,11 +17,11 @@ export interface StudyGroup {
       name: string;
       profilePicture?: string;
     };
-    role: 'admin' | 'moderator' | 'member';
     joinedAt: string;
+    role: string;
     isActive: boolean;
   }>;
-  privacy: 'public' | 'private' | 'invite-only';
+  privacy: string;
   settings: {
     allowMemberInvites: boolean;
     requireApproval: boolean;
@@ -36,16 +36,18 @@ export interface StudyGroup {
     lastActivity: string;
   };
   tags: string[];
+  memberCount: number;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface CreateStudyGroupData {
+export interface CreateStudyGroupRequest {
   name: string;
   description?: string;
   examTypes: string[];
   targetDate: string;
-  privacy?: 'public' | 'private' | 'invite-only';
+  privacy?: string;
   settings?: {
     allowMemberInvites?: boolean;
     requireApproval?: boolean;
@@ -56,49 +58,108 @@ export interface CreateStudyGroupData {
   tags?: string[];
 }
 
-export interface GroupActivity {
+export interface GroupProgressSettings {
   _id: string;
+  user: string;
   group: string;
-  user: {
-    _id: string;
-    name: string;
-    profilePicture?: string;
+  shareSettings: {
+    studyHours: string;
+    studyStreak: string;
+    subjectProgress: string;
+    goalCompletion: string;
+    testScores: string;
+    achievements: string;
+    studySchedule: string;
   };
-  activityType: string;
-  data: {
-    title?: string;
-    description?: string;
-    metadata?: any;
+  displayPreferences: {
+    showRealName: boolean;
+    showInLeaderboard: boolean;
+    allowDataComparison: boolean;
+    showProgressMilestones: boolean;
   };
-  visibility: string;
-  points: number;
-  reactions: Array<{
-    user: string;
-    reaction: 'like' | 'love' | 'celebrate' | 'support' | 'motivate';
-    reactedAt: string;
-  }>;
-  comments: Array<{
+  partnerList: Array<{
     user: {
       _id: string;
       name: string;
       profilePicture?: string;
     };
-    comment: string;
-    commentedAt: string;
+    partnershipStatus: string;
+    partneredAt: string;
   }>;
-  createdAt: string;
 }
 
-export interface LeaderboardEntry {
-  userId: string;
-  name: string;
-  profilePicture?: string;
-  totalPoints: number;
-  activityCount: number;
-  lastActivity: string;
+export interface GroupStats {
+  _id: string;
+  group: string;
+  memberStats: {
+    totalActiveMembers: number;
+    averageStudyHours: number;
+    totalStudyHours: number;
+    averageStreak: number;
+    longestGroupStreak: number;
+    totalGoalsCompleted: number;
+  };
+  subjectStats: Array<{
+    subject: string;
+    totalHours: number;
+    memberCount: number;
+    averageProductivity: number;
+    popularityRank: number;
+  }>;
+  leaderboardData: {
+    topStudyHours: Array<{
+      user: {
+        _id: string;
+        name: string;
+        profilePicture?: string;
+      };
+      hours: number;
+      rank: number;
+    }>;
+    topStreak: Array<{
+      user: {
+        _id: string;
+        name: string;
+        profilePicture?: string;
+      };
+      streak: number;
+      rank: number;
+    }>;
+    topProductivity: Array<{
+      user: {
+        _id: string;
+        name: string;
+        profilePicture?: string;
+      };
+      productivity: number;
+      rank: number;
+    }>;
+  };
+  comparisonMetrics: {
+    percentileRanks: {
+      studyHours: {
+        p25: number;
+        p50: number;
+        p75: number;
+        p90: number;
+      };
+      streak: {
+        p25: number;
+        p50: number;
+        p75: number;
+        p90: number;
+      };
+      productivity: {
+        p25: number;
+        p50: number;
+        p75: number;
+        p90: number;
+      };
+    };
+  };
 }
 
-// Study Group API functions
+// Study Groups API
 export const studyGroupApi = {
   // Get public study groups
   getPublicGroups: async (params?: {
@@ -106,16 +167,9 @@ export const studyGroupApi = {
     limit?: number;
     examType?: string;
     search?: string;
-    sortBy?: 'members' | 'activity' | 'newest' | 'oldest';
+    sortBy?: string;
   }) => {
-    const queryParams = new URLSearchParams();
-    if (params?.page) queryParams.append('page', params.page.toString());
-    if (params?.limit) queryParams.append('limit', params.limit.toString());
-    if (params?.examType) queryParams.append('examType', params.examType);
-    if (params?.search) queryParams.append('search', params.search);
-    if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
-
-    const response = await axiosInstance.get(`/groups?${queryParams.toString()}`);
+    const response = await axiosInstance.get('/groups', { params });
     return response.data;
   },
 
@@ -132,13 +186,13 @@ export const studyGroupApi = {
   },
 
   // Create study group
-  createStudyGroup: async (data: CreateStudyGroupData) => {
+  createStudyGroup: async (data: CreateStudyGroupRequest) => {
     const response = await axiosInstance.post('/groups', data);
     return response.data;
   },
 
   // Update study group
-  updateStudyGroup: async (groupId: string, data: Partial<CreateStudyGroupData>) => {
+  updateStudyGroup: async (groupId: string, data: Partial<CreateStudyGroupRequest>) => {
     const response = await axiosInstance.put(`/groups/${groupId}`, data);
     return response.data;
   },
@@ -162,28 +216,78 @@ export const studyGroupApi = {
   },
 
   // Get group leaderboard
-  getGroupLeaderboard: async (groupId: string, period: 'day' | 'week' | 'month' = 'week') => {
-    const response = await axiosInstance.get(`/groups/${groupId}/leaderboard?period=${period}`);
+  getGroupLeaderboard: async (groupId: string, params?: {
+    period?: string;
+    category?: string;
+  }) => {
+    const response = await axiosInstance.get(`/groups/${groupId}/leaderboard`, { params });
     return response.data;
   },
 
   // Get group activities
-  getGroupActivities: async (groupId: string, page: number = 1, limit: number = 20) => {
-    const response = await axiosInstance.get(`/groups/${groupId}/activities?page=${page}&limit=${limit}`);
+  getGroupActivities: async (groupId: string, params?: {
+    page?: number;
+    limit?: number;
+  }) => {
+    const response = await axiosInstance.get(`/groups/${groupId}/activities`, { params });
     return response.data;
   },
-
-  // React to activity
-  reactToActivity: async (activityId: string, reaction: 'like' | 'love' | 'celebrate' | 'support' | 'motivate') => {
-    const response = await axiosInstance.post(`/groups/activities/${activityId}/react`, { reaction });
-    return response.data;
-  },
-
-  // Comment on activity
-  commentOnActivity: async (activityId: string, comment: string) => {
-    const response = await axiosInstance.post(`/groups/activities/${activityId}/comment`, { comment });
-    return response.data;
-  }
 };
 
-export default studyGroupApi;
+// Group Progress API
+export const groupProgressApi = {
+  // Get progress settings
+  getProgressSettings: async (groupId: string) => {
+    const response = await axiosInstance.get(`/group-progress/${groupId}/progress-settings`);
+    return response.data;
+  },
+
+  // Update progress settings
+  updateProgressSettings: async (groupId: string, data: {
+    shareSettings?: Partial<GroupProgressSettings['shareSettings']>;
+    displayPreferences?: Partial<GroupProgressSettings['displayPreferences']>;
+  }) => {
+    const response = await axiosInstance.put(`/group-progress/${groupId}/progress-settings`, data);
+    return response.data;
+  },
+
+  // Get group progress dashboard
+  getGroupProgressDashboard: async (groupId: string, period?: string) => {
+    const response = await axiosInstance.get(`/group-progress/${groupId}/progress-dashboard`, {
+      params: { period }
+    });
+    return response.data;
+  },
+
+  // Get group leaderboards
+  getGroupLeaderboards: async (groupId: string, params?: {
+    period?: string;
+    category?: string;
+  }) => {
+    const response = await axiosInstance.get(`/group-progress/${groupId}/leaderboards`, { params });
+    return response.data;
+  },
+
+  // Request study partnership
+  requestStudyPartnership: async (groupId: string, partnerId: string) => {
+    const response = await axiosInstance.post(`/group-progress/${groupId}/request-partnership`, {
+      partnerId
+    });
+    return response.data;
+  },
+
+  // Respond to partnership request
+  respondToPartnership: async (groupId: string, requesterId: string, status: 'accepted' | 'declined') => {
+    const response = await axiosInstance.put(`/group-progress/${groupId}/respond-partnership`, {
+      requesterId,
+      status
+    });
+    return response.data;
+  },
+
+  // Get study partners
+  getStudyPartners: async (groupId: string) => {
+    const response = await axiosInstance.get(`/group-progress/${groupId}/study-partners`);
+    return response.data;
+  },
+};

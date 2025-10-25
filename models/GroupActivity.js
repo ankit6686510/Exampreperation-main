@@ -16,6 +16,10 @@ const groupActivitySchema = new mongoose.Schema({
     enum: [
       // Study Activities
       'study_session_completed',
+      'study_session_scheduled',
+      'study_session_started',
+      'study_session_joined',
+      'study_session_left',
       'daily_goal_completed',
       'book_chapter_completed',
       'book_finished',
@@ -32,7 +36,17 @@ const groupActivitySchema = new mongoose.Schema({
       'member_joined',
       'member_left',
       'group_challenge_completed',
+      'group_challenge_created',
+      'group_challenge_joined',
       'leaderboard_position_changed',
+      'study_room_created',
+      'study_room_joined',
+      
+      // Resource Activities
+      'resource_shared',
+      'resource_bookmarked',
+      'resource_rated',
+      'resource_downloaded',
       
       // Achievement Activities
       'badge_earned',
@@ -44,7 +58,10 @@ const groupActivitySchema = new mongoose.Schema({
       'permission_granted',
       'data_shared',
       'help_provided',
-      'motivation_given'
+      'motivation_given',
+      'partnership_requested',
+      'partnership_accepted',
+      'partnership_ended'
     ],
     required: true
   },

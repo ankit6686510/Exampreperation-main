@@ -16,6 +16,10 @@ import MonthlyPlan from "./pages/MonthlyPlan/MonthlyPlan";
 import StudySessions from "./pages/StudySessions/StudySessions";
 import AdvancedProgress from "./pages/AdvancedProgress/AdvancedProgress";
 import Profile from "./pages/Profile/Profile";
+import StudyGroups from "./pages/StudyGroups/StudyGroups";
+import StudyRooms from "./pages/StudyRooms/StudyRooms";
+import SharedResources from "./pages/SharedResources/SharedResources";
+import Challenges from "./pages/Challenges/Challenges";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +49,10 @@ const App = () => (
               <Route path="/monthly-plan" element={<MonthlyPlan />} />
               <Route path="/study-sessions" element={<StudySessions />} />
               <Route path="/advanced-progress" element={<AdvancedProgress />} />
+              <Route path="/study-groups" element={<StudyGroups />} />
+              <Route path="/study-rooms" element={<StudyRooms />} />
+              <Route path="/shared-resources" element={<SharedResources />} />
+              <Route path="/challenges" element={<Challenges />} />
               <Route path="/profile" element={<Profile />} />
             </Route>
             <Route path="*" element={<NotFound />} />

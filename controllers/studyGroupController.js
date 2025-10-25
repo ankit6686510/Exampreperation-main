@@ -3,9 +3,9 @@ const GroupPermission = require('../models/GroupPermission');
 const GroupActivity = require('../models/GroupActivity');
 const User = require('../models/User');
 
-// @desc    Get all public study groups
+// @desc    Get discoverable study groups (groups created by others)
 // @route   GET /api/groups
-// @access  Public
+// @access  Private
 const getPublicGroups = async (req, res) => {
   try {
     const { 
@@ -17,10 +17,14 @@ const getPublicGroups = async (req, res) => {
     } = req.query;
 
     const skip = (page - 1) * limit;
-    let query = { privacy: 'public', isActive: true };
+    let query = { 
+      privacy: 'public', 
+      isActive: true
+      // Removed exclusion so creators can see their own groups in discover
+    };
 
     // Add exam type filter
-    if (examType) {
+    if (examType && examType !== 'all') {
       query.examTypes = examType;
     }
 
@@ -83,14 +87,19 @@ const getPublicGroups = async (req, res) => {
   }
 };
 
-// @desc    Get user's study groups
+// @desc    Get user's study groups (groups where user is a member - admin or regular member)
 // @route   GET /api/groups/my-groups
 // @access  Private
 const getUserGroups = async (req, res) => {
   try {
     const groups = await StudyGroup.find({
-      'members.user': req.user.id,
-      'members.isActive': true,
+      $or: [
+        { admin: req.user.id }, // Groups owned by current user
+        { 
+          'members.user': req.user.id,
+          'members.isActive': true
+        } // Groups where user is an active member
+      ],
       isActive: true
     })
     .populate('admin', 'name profilePicture')
@@ -448,13 +457,47 @@ const deleteStudyGroup = async (req, res) => {
       });
     }
 
-    // Soft delete (mark as inactive)
+    // Import models for cascade delete
+    const StudyRoom = require('../models/StudyRoom');
+    const SharedResource = require('../models/SharedResource');
+
+    // Cascade delete: Remove all associated study rooms
+    await StudyRoom.updateMany(
+      { group: group._id },
+      { isActive: false }
+    );
+
+    // Cascade delete: Remove all associated shared resources
+    await SharedResource.updateMany(
+      { groupId: group._id },
+      { isActive: false }
+    );
+
+    // Cascade delete: Remove all group activities
+    await GroupActivity.updateMany(
+      { group: group._id },
+      { visibility: 'private' } // Hide activities instead of deleting for audit trail
+    );
+
+    // Soft delete the group (mark as inactive)
     group.isActive = false;
     await group.save();
 
+    // Create final activity log
+    await GroupActivity.createActivity({
+      group: group._id,
+      user: req.user.id,
+      activityType: 'member_left', // Using existing enum value
+      data: {
+        title: 'Group Deleted',
+        description: `${req.user.name} deleted the group "${group.name}"`
+      },
+      visibility: 'private'
+    });
+
     res.status(200).json({
       success: true,
-      message: 'Study group deleted successfully'
+      message: 'Study group and all associated content deleted successfully'
     });
   } catch (error) {
     console.error('Delete study group error:', error);

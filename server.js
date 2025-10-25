@@ -66,6 +66,9 @@ const syllabus = require('./routes/syllabus');
 const upscResources = require('./routes/upscResources');
 const newspaperAnalysis = require('./routes/newspaperAnalysis');
 const studyGroups = require('./routes/studyGroups');
+const groupProgress = require('./routes/groupProgress');
+const studyRooms = require('./routes/studyRooms');
+const sharedResources = require('./routes/sharedResources');
 
 // Mount routers
 app.use('/api/auth', auth);
@@ -78,6 +81,9 @@ app.use('/api/syllabus', syllabus);
 app.use('/api/upsc-resources', upscResources);
 app.use('/api/newspaper-analysis', newspaperAnalysis);
 app.use('/api/groups', studyGroups);
+app.use('/api/group-progress', groupProgress);
+app.use('/api/study-rooms', studyRooms);
+app.use('/api/shared-resources', sharedResources);
 
 // Serve static files from the React app in production
 if (process.env.NODE_ENV === 'production') {
