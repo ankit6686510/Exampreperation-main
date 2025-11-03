@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { fetchBooks, updateBook, clearFilters } from '@/redux/slices/bookSlice';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Plus, 
   Grid, 
@@ -11,7 +12,8 @@ import {
   BookOpen,
   Search as SearchIcon,
   Filter,
-  X
+  X,
+  Library
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Book } from '@/redux/slices/bookSlice';
@@ -22,6 +24,7 @@ import SearchAndFilters from '@/components/Books/SearchAndFilters';
 import EnhancedBookCard from '@/components/Books/EnhancedBookCard';
 import BookDetailModal from '@/components/Books/BookDetailModal';
 import BookFormModal from '@/components/Books/BookFormModal';
+import ResourcesMain from '@/components/Resources/ResourcesMain';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 type ViewMode = 'grid' | 'list' | 'analytics';
@@ -247,129 +250,160 @@ const BooksRevamped = () => {
   return (
     <ErrorBoundary>
       <div className="space-y-6 p-4 sm:p-6">
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Subjects</h1>
-          <p className="mt-1 text-sm sm:text-base text-muted-foreground">
-            Manage your subjects and track your learning progress
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          {/* View Mode Toggle */}
-          <div className="flex items-center rounded-lg border p-1">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className="h-8 w-8 p-0"
-            >
-              <Grid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="h-8 w-8 p-0"
-            >
-              <List className="h-4 w-4" />
-            </Button>
+        {/* Header */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Study Library</h1>
+            <p className="mt-1 text-sm sm:text-base text-muted-foreground">
+              Manage your subjects, resources, and track your learning progress
+            </p>
           </div>
-          
-          <Button onClick={handleAddNew}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Subject
-          </Button>
         </div>
-      </div>
 
-      {/* Overview Cards */}
-      <BooksOverview books={books} isLoading={isLoading} />
+        {/* Tabs */}
+        <Tabs defaultValue="subjects" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="subjects" className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4" />
+              Subjects
+            </TabsTrigger>
+            <TabsTrigger value="resources" className="flex items-center gap-2">
+              <Library className="h-4 w-4" />
+              Resources
+            </TabsTrigger>
+          </TabsList>
 
-      {/* Search and Filters */}
-      <SearchAndFilters
-        books={books}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        sortBy={sortBy}
-        onSortChange={setSortBy}
-        sortOrder={sortOrder}
-        onSortOrderChange={setSortOrder}
-      />
-
-      {/* Content Area */}
-      <div className="space-y-4">
-          {/* Results Info */}
-          {(searchTerm || Object.values(filters).some(f => f)) && (
-            <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3">
-              <div className="flex items-center gap-2 text-sm">
-                <SearchIcon className="h-4 w-4" />
-                <span>
-                  Showing {filteredAndSortedBooks.length} of {books.length} subjects
-                </span>
+          {/* Subjects Tab */}
+          <TabsContent value="subjects" className="space-y-6 mt-6">
+            {/* Subject Header Actions */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold">Your Subjects</h2>
+                <p className="text-sm text-muted-foreground">
+                  Track progress across all your study subjects
+                </p>
               </div>
-              <Button variant="ghost" size="sm" onClick={handleClearAll}>
-                <X className="h-3 w-3 mr-1" />
-                Clear all
-              </Button>
+              <div className="flex items-center gap-2">
+                {/* View Mode Toggle */}
+                <div className="flex items-center rounded-lg border p-1">
+                  <Button
+                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('grid')}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Grid className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('list')}
+                    className="h-8 w-8 p-0"
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <Button onClick={handleAddNew}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Subject
+                </Button>
+              </div>
             </div>
-          )}
 
-          {/* Books Grid/List */}
-          {filteredAndSortedBooks.length > 0 ? (
-            <div className={
-              viewMode === 'grid' 
-                ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                : "space-y-4"
-            }>
-              {filteredAndSortedBooks.map((book) => (
-                <EnhancedBookCard
-                  key={book.id}
-                  book={book}
-                  onEdit={handleEdit}
-                  onViewDetails={handleViewDetails}
-                  onQuickChapterUpdate={handleQuickChapterUpdate}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              {searchTerm || Object.values(filters).some(f => f) ? (
-                <>
-                  <SearchIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No subjects found</h3>
-                  <p className="text-muted-foreground mb-4">
-                    No subjects match your current search and filters
-                  </p>
-                  <Button variant="outline" onClick={handleClearAll}>
-                    <X className="h-4 w-4 mr-2" />
-                    Clear filters
+            {/* Overview Cards */}
+            <BooksOverview books={books} isLoading={isLoading} />
+
+            {/* Search and Filters */}
+            <SearchAndFilters
+              books={books}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+              sortOrder={sortOrder}
+              onSortOrderChange={setSortOrder}
+            />
+
+            {/* Content Area */}
+            <div className="space-y-4">
+              {/* Results Info */}
+              {(searchTerm || Object.values(filters).some(f => f)) && (
+                <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3">
+                  <div className="flex items-center gap-2 text-sm">
+                    <SearchIcon className="h-4 w-4" />
+                    <span>
+                      Showing {filteredAndSortedBooks.length} of {books.length} subjects
+                    </span>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={handleClearAll}>
+                    <X className="h-3 w-3 mr-1" />
+                    Clear all
                   </Button>
-                </>
+                </div>
+              )}
+
+              {/* Books Grid/List */}
+              {filteredAndSortedBooks.length > 0 ? (
+                <div className={
+                  viewMode === 'grid' 
+                    ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                    : "space-y-4"
+                }>
+                  {filteredAndSortedBooks.map((book) => (
+                    <EnhancedBookCard
+                      key={book.id}
+                      book={book}
+                      onEdit={handleEdit}
+                      onViewDetails={handleViewDetails}
+                      onQuickChapterUpdate={handleQuickChapterUpdate}
+                    />
+                  ))}
+                </div>
               ) : (
-                <>
-                  <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-medium mb-2">No subjects yet</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Start building your study library by adding your first subject
-                  </p>
-                  <Button onClick={handleAddNew}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Your First Subject
-                  </Button>
-                </>
+                <div className="text-center py-12">
+                  {searchTerm || Object.values(filters).some(f => f) ? (
+                    <>
+                      <SearchIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No subjects found</h3>
+                      <p className="text-muted-foreground mb-4">
+                        No subjects match your current search and filters
+                      </p>
+                      <Button variant="outline" onClick={handleClearAll}>
+                        <X className="h-4 w-4 mr-2" />
+                        Clear filters
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <BookOpen className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No subjects yet</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Start building your study library by adding your first subject
+                      </p>
+                      <Button onClick={handleAddNew}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Your First Subject
+                      </Button>
+                    </>
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </div>
+          </TabsContent>
 
-      {/* Modals */}
-      <BookDetailModal
-        book={selectedBook}
-        isOpen={isDetailModalOpen}
-        onClose={handleCloseModals}
-      />
+          {/* Resources Tab */}
+          <TabsContent value="resources" className="mt-6">
+            <ResourcesMain />
+          </TabsContent>
+        </Tabs>
+
+        {/* Modals */}
+        <BookDetailModal
+          book={selectedBook}
+          isOpen={isDetailModalOpen}
+          onClose={handleCloseModals}
+        />
 
         <BookFormModal
           book={editingBook}

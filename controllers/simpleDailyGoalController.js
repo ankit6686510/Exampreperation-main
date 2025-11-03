@@ -1,4 +1,5 @@
 const DailyGoal = require('../models/DailyGoal');
+const logger = require('../config/logger');
 
 // @desc    Get daily goals as individual tasks (simplified for frontend)
 // @route   GET /api/daily-goals?date=YYYY-MM-DD
@@ -40,7 +41,7 @@ const getDailyGoals = async (req, res) => {
       data: tasks
     });
   } catch (error) {
-    console.error('Get daily goals error:', error);
+    logger.error('Get daily goals error:', { error: error.message, stack: error.stack, context: 'Get daily goals' });
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -101,7 +102,7 @@ const addDailyGoal = async (req, res) => {
       data: responseTask
     });
   } catch (error) {
-    console.error('Add daily goal error:', error);
+    logger.error('Add daily goal error:', { error: error.message, stack: error.stack, context: 'Add daily goal' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -148,7 +149,7 @@ const toggleDailyGoal = async (req, res) => {
       data: responseTask
     });
   } catch (error) {
-    console.error('Toggle daily goal error:', error);
+    logger.error('Toggle daily goal error:', { error: error.message, stack: error.stack, context: 'Toggle daily goal' });
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -184,7 +185,7 @@ const deleteDailyGoal = async (req, res) => {
       message: 'Task deleted successfully'
     });
   } catch (error) {
-    console.error('Delete daily goal error:', error);
+    logger.error('Delete daily goal error:', { error: error.message, stack: error.stack, context: 'Delete daily goal' });
     res.status(500).json({
       success: false,
       message: 'Server error'

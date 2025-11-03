@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Layout from "./components/Layout";
 import Login from "./pages/Auth/Login";
@@ -17,7 +18,7 @@ import StudySessions from "./pages/StudySessions/StudySessions";
 import AdvancedProgress from "./pages/AdvancedProgress/AdvancedProgress";
 import Profile from "./pages/Profile/Profile";
 import StudyGroups from "./pages/StudyGroups/StudyGroups";
-import StudyRooms from "./pages/StudyRooms/StudyRooms";
+import StudyRooms from "./pages/StudyRooms/StudyRoomsModern";
 import SharedResources from "./pages/SharedResources/SharedResources";
 import Challenges from "./pages/Challenges/Challenges";
 import NotFound from "./pages/NotFound";
@@ -27,38 +28,45 @@ const queryClient = new QueryClient();
 const App = () => (
   <Provider store={store}>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter 
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true
+          }}
+        >
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route
-              path="/"
+              path="/*"
               element={
                 <ProtectedRoute>
                   <Layout />
                 </ProtectedRoute>
               }
             >
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/subjects" element={<Books />} />
-              <Route path="/daily-goals" element={<DailyGoals />} />
-              <Route path="/monthly-plan" element={<MonthlyPlan />} />
-              <Route path="/study-sessions" element={<StudySessions />} />
-              <Route path="/advanced-progress" element={<AdvancedProgress />} />
-              <Route path="/study-groups" element={<StudyGroups />} />
-              <Route path="/study-rooms" element={<StudyRooms />} />
-              <Route path="/shared-resources" element={<SharedResources />} />
-              <Route path="/challenges" element={<Challenges />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="subjects" element={<Books />} />
+              <Route path="daily-goals" element={<DailyGoals />} />
+              <Route path="monthly-plan" element={<MonthlyPlan />} />
+              <Route path="study-sessions" element={<StudySessions />} />
+              <Route path="advanced-progress" element={<AdvancedProgress />} />
+              <Route path="study-groups" element={<StudyGroups />} />
+              <Route path="study-rooms" element={<StudyRooms />} />
+              <Route path="shared-resources" element={<SharedResources />} />
+              <Route path="challenges" element={<Challenges />} />
+              <Route path="profile" element={<Profile />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </Provider>
 );

@@ -29,8 +29,8 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  token: localStorage.getItem('token'),
-  isLoading: localStorage.getItem('token') ? true : false, // Loading if token exists
+  token: sessionStorage.getItem('token'),
+  isLoading: false,
   isInitialized: false,
   error: null,
 };
@@ -40,7 +40,7 @@ export const login = createAsyncThunk<LoginResponse, { email: string; password: 
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post('/auth/login', credentials);
-      localStorage.setItem('token', response.data.data.token);
+      sessionStorage.setItem('token', response.data.data.token);
       return response.data.data;
     } catch (error: unknown) {
       const errorMessage = error instanceof Error 
@@ -56,7 +56,7 @@ export const register = createAsyncThunk<RegisterResponse, { name: string; email
   async (userData, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post('/auth/register', userData);
-      localStorage.setItem('token', response.data.data.token);
+      sessionStorage.setItem('token', response.data.data.token);
       return response.data.data;
     } catch (error: unknown) {
       const errorMessage = error instanceof Error 
@@ -89,7 +89,9 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.token = null;
-      localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
+      // Call logout endpoint to clear httpOnly cookie
+      axiosInstance.post('/auth/logout').catch(() => {});
     },
     clearError: (state) => {
       state.error = null;
@@ -138,7 +140,7 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isInitialized = true;
         state.token = null;
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
       });
   },
 });

@@ -2,6 +2,7 @@ const StudyRoom = require('../models/StudyRoom');
 const StudyGroup = require('../models/StudyGroup');
 const GroupActivity = require('../models/GroupActivity');
 const User = require('../models/User');
+const logger = require('../config/logger');
 
 // @desc    Create a new study room
 // @route   POST /api/study-rooms
@@ -126,7 +127,7 @@ const createStudyRoom = async (req, res) => {
       data: { studyRoom }
     });
   } catch (error) {
-    console.error('Create study room error:', error);
+    logger.error('Create study room error:', { error: error.message, stack: error.stack, context: 'Create study room' });
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to create study room'
@@ -194,7 +195,7 @@ const getGroupStudyRooms = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get group study rooms error:', error);
+    logger.error('Get group study rooms error:', { error: error.message, stack: error.stack, context: 'Get group study rooms' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch study rooms'
@@ -233,7 +234,7 @@ const getStudyRoom = async (req, res) => {
       data: { studyRoom }
     });
   } catch (error) {
-    console.error('Get study room error:', error);
+    logger.error('Get study room error:', { error: error.message, stack: error.stack, context: 'Get study room' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch study room details'
@@ -316,7 +317,7 @@ const joinStudyRoom = async (req, res) => {
       message: 'Successfully joined the study room'
     });
   } catch (error) {
-    console.error('Join study room error:', error);
+    logger.error('Join study room error:', { error: error.message, stack: error.stack, context: 'Join study room' });
     res.status(500).json({
       success: false,
       message: 'Failed to join study room'
@@ -366,7 +367,7 @@ const leaveStudyRoom = async (req, res) => {
       message: 'Successfully left the study room'
     });
   } catch (error) {
-    console.error('Leave study room error:', error);
+    logger.error('Leave study room error:', { error: error.message, stack: error.stack, context: 'Leave study room' });
     res.status(500).json({
       success: false,
       message: 'Failed to leave study room'
@@ -442,7 +443,7 @@ const startStudySession = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Start study session error:', error);
+    logger.error('Start study session error:', { error: error.message, stack: error.stack, context: 'Start study session' });
     res.status(500).json({
       success: false,
       message: 'Failed to start study session'
@@ -515,7 +516,7 @@ const endStudySession = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('End study session error:', error);
+    logger.error('End study session error:', { error: error.message, stack: error.stack, context: 'End study session' });
     res.status(500).json({
       success: false,
       message: 'Failed to end study session'
@@ -564,7 +565,7 @@ const nextPomodoroPhase = async (req, res) => {
       data: { pomodoroState: studyRoom.pomodoroState }
     });
   } catch (error) {
-    console.error('Update pomodoro phase error:', error);
+    logger.error('Update pomodoro phase error:', { error: error.message, stack: error.stack, context: 'Update pomodoro phase' });
     res.status(500).json({
       success: false,
       message: 'Failed to update pomodoro phase'
@@ -627,7 +628,7 @@ const submitSessionFeedback = async (req, res) => {
       message: 'Feedback submitted successfully'
     });
   } catch (error) {
-    console.error('Submit session feedback error:', error);
+    logger.error('Submit session feedback error:', { error: error.message, stack: error.stack, context: 'Submit session feedback' });
     res.status(500).json({
       success: false,
       message: 'Failed to submit feedback'
@@ -675,7 +676,7 @@ const getUserStudyRoomHistory = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get user study room history error:', error);
+    logger.error('Get user study room history error:', { error: error.message, stack: error.stack, context: 'Get user study room history' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch study room history'

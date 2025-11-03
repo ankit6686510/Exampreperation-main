@@ -8,6 +8,7 @@ const {
   deleteDailyGoal
 } = require('../controllers/dailyGoalController');
 const { protect } = require('../middleware/auth');
+const { dailyGoalValidations, queryValidations } = require('../middleware/validation');
 
 const router = express.Router();
 
@@ -16,10 +17,10 @@ router.use(protect);
 
 router
   .route('/')
-  .get(getDailyGoals)
-  .post(createDailyGoal);
+  .get(queryValidations.pagination, getDailyGoals)
+  .post(dailyGoalValidations.create, createDailyGoal);
 
-router.delete('/:goalId', deleteDailyGoal);
+router.delete('/:goalId', dailyGoalValidations.update, deleteDailyGoal);
 
 // Task specific routes
 router.patch('/:goalId/tasks/:taskId', updateTaskStatus);

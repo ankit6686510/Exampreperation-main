@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@excalidraw/excalidraw": "^0.17.6",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.1",
     "@radix-ui/react-alert-dialog": "^1.1.2",
@@ -61,10 +62,16 @@
     "react-router-dom": "^6.28.0",
     "react-window": "^2.2.1",
     "recharts": "^2.15.4",
+    "recordrtc": "^5.6.2",
+    "simple-peer": "^9.11.1",
+    "socket.io-client": "^4.8.1",
     "sonner": "^1.7.3",
     "tailwind-merge": "^2.5.4",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.0.0",
+    "wavesurfer.js": "^7.8.6",
+    "yjs": "^13.6.10",
+    "y-websocket": "^1.5.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

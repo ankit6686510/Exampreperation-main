@@ -8,6 +8,7 @@ import syllabusSlice from './slices/syllabusSlice';
 import upscResourceSlice from './slices/upscResourceSlice';
 import newspaperAnalysisSlice from './slices/newspaperAnalysisSlice';
 import uiSlice from './slices/uiSlice';
+import resourceSlice from './slices/resourceSlice';
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
     upscResources: upscResourceSlice,
     newspaperAnalysis: newspaperAnalysisSlice,
     ui: uiSlice,
+    resources: resourceSlice,
   },
 });
 

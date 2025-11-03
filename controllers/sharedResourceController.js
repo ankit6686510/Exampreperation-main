@@ -3,6 +3,7 @@ const StudyGroup = require('../models/StudyGroup');
 const GroupActivity = require('../models/GroupActivity');
 const GroupProgressShare = require('../models/GroupProgressShare');
 const User = require('../models/User');
+const logger = require('../config/logger');
 
 // @desc    Create/upload a new shared resource
 // @route   POST /api/shared-resources
@@ -96,7 +97,7 @@ const createSharedResource = async (req, res) => {
       data: { resource: sharedResource }
     });
   } catch (error) {
-    console.error('Create shared resource error:', error);
+    logger.error('Create shared resource error:', { error: error.message, stack: error.stack, context: 'Create shared resource' });
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to share resource'
@@ -200,7 +201,7 @@ const getGroupResources = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get group resources error:', error);
+    logger.error('Get group resources error:', { error: error.message, stack: error.stack, context: 'Get group resources' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch group resources'
@@ -283,7 +284,7 @@ const getSharedResource = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get shared resource error:', error);
+    logger.error('Get shared resource error:', { error: error.message, stack: error.stack, context: 'Get shared resource' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch resource details'
@@ -365,7 +366,7 @@ const downloadResource = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Download resource error:', error);
+    logger.error('Download resource error:', { error: error.message, stack: error.stack, context: 'Download resource' });
     res.status(500).json({
       success: false,
       message: 'Failed to process download request'
@@ -417,7 +418,7 @@ const toggleBookmark = async (req, res) => {
       data: { isBookmarked: !wasBookmarked }
     });
   } catch (error) {
-    console.error('Toggle bookmark error:', error);
+    logger.error('Toggle bookmark error:', { error: error.message, stack: error.stack, context: 'Toggle bookmark' });
     res.status(500).json({
       success: false,
       message: 'Failed to toggle bookmark'
@@ -492,7 +493,7 @@ const rateResource = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Rate resource error:', error);
+    logger.error('Rate resource error:', { error: error.message, stack: error.stack, context: 'Rate resource' });
     res.status(500).json({
       success: false,
       message: 'Failed to rate resource'
@@ -559,7 +560,7 @@ const flagResource = async (req, res) => {
       message: 'Resource flagged successfully. It will be reviewed by moderators.'
     });
   } catch (error) {
-    console.error('Flag resource error:', error);
+    logger.error('Flag resource error:', { error: error.message, stack: error.stack, context: 'Flag resource' });
     res.status(500).json({
       success: false,
       message: 'Failed to flag resource'
@@ -602,7 +603,7 @@ const getUserBookmarks = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get user bookmarks error:', error);
+    logger.error('Get user bookmarks error:', { error: error.message, stack: error.stack, context: 'Get user bookmarks' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch bookmarked resources'
@@ -649,7 +650,7 @@ const getUserSharedResources = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get user shared resources error:', error);
+    logger.error('Get user shared resources error:', { error: error.message, stack: error.stack, context: 'Get user shared resources' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch your shared resources'
@@ -688,7 +689,7 @@ const getTrendingResources = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get trending resources error:', error);
+    logger.error('Get trending resources error:', { error: error.message, stack: error.stack, context: 'Get trending resources' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch trending resources'

@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, BookOpen, Target, Calendar, Clock, FileText, TrendingUp, User, LogOut } from 'lucide-react';
+import { Home, BookOpen, Target, Calendar, Clock, FileText, TrendingUp, User, LogOut, Bell } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { logout } from '@/redux/slices/authSlice';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ const Sidebar = () => {
 
   const navItems = [
     { icon: Home, label: 'Dashboard', path: '/dashboard' },
+    { icon: Bell, label: 'Notifications', path: '/notifications' },
     { icon: BookOpen, label: 'Books', path: '/books' },
     { icon: Target, label: 'Daily Goals', path: '/goals/daily' },
     { icon: Calendar, label: 'Monthly Plan', path: '/goals/monthly' },

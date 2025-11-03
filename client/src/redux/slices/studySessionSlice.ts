@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { studySessionApi, StudySession, CreateStudySessionRequest, StudyAnalytics } from '../../api/studySessionApi';
+import type { ApiError } from '@/types/api';
 
 interface StudySessionState {
   sessions: StudySession[];
@@ -30,8 +31,9 @@ export const createStudySession = createAsyncThunk(
     try {
       const session = await studySessionApi.createSession(sessionData);
       return session;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create study session');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to create study session');
     }
   }
 );
@@ -48,8 +50,9 @@ export const fetchStudySessions = createAsyncThunk(
     try {
       const response = await studySessionApi.getSessions(params);
       return response;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch study sessions');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to fetch study sessions');
     }
   }
 );
@@ -60,8 +63,9 @@ export const fetchStudySession = createAsyncThunk(
     try {
       const session = await studySessionApi.getSession(id);
       return session;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch study session');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to fetch study session');
     }
   }
 );
@@ -72,8 +76,9 @@ export const updateStudySession = createAsyncThunk(
     try {
       const session = await studySessionApi.updateSession(id, data);
       return session;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update study session');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to update study session');
     }
   }
 );
@@ -84,8 +89,9 @@ export const deleteStudySession = createAsyncThunk(
     try {
       await studySessionApi.deleteSession(id);
       return id;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to delete study session');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to delete study session');
     }
   }
 );
@@ -96,8 +102,9 @@ export const fetchStudyAnalytics = createAsyncThunk(
     try {
       const analytics = await studySessionApi.getAnalytics(period);
       return analytics;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch analytics');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to fetch analytics');
     }
   }
 );

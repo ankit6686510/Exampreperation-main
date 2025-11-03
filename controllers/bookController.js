@@ -1,5 +1,6 @@
 const Book = require('../models/Book');
 const Syllabus = require('../models/Syllabus');
+const logger = require('../config/logger');
 
 // @desc    Get all books for user
 // @route   GET /api/books
@@ -39,7 +40,7 @@ const getBooks = async (req, res) => {
       data: booksWithStats
     });
   } catch (error) {
-    console.error('Get books error:', error);
+    logger.error('Get books error:', { error: error.message, stack: error.stack, context: 'Get books' });
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -87,7 +88,7 @@ const getBook = async (req, res) => {
       data: bookWithStats
     });
   } catch (error) {
-    console.error('Get book error:', error);
+    logger.error('Get book error:', { error: error.message, stack: error.stack, context: 'Get book' });
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -134,7 +135,7 @@ const createBook = async (req, res) => {
       data: book
     });
   } catch (error) {
-    console.error('Create book error:', error);
+    logger.error('Create book error:', { error: error.message, stack: error.stack, context: 'Create book' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -178,7 +179,7 @@ const updateBook = async (req, res) => {
       data: book
     });
   } catch (error) {
-    console.error('Update book error:', error);
+    logger.error('Update book error:', { error: error.message, stack: error.stack, context: 'Update book' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -217,7 +218,7 @@ const deleteBook = async (req, res) => {
       message: 'Book deleted successfully'
     });
   } catch (error) {
-    console.error('Delete book error:', error);
+    logger.error('Delete book error:', { error: error.message, stack: error.stack, context: 'Delete book' });
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -280,7 +281,7 @@ const updateChapter = async (req, res) => {
       data: book.chapters[chapterIdx]
     });
   } catch (error) {
-    console.error('Update chapter error:', error);
+    logger.error('Update chapter error:', { error: error.message, stack: error.stack, context: 'Update chapter' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -338,7 +339,7 @@ const addTestToChapter = async (req, res) => {
       message: 'Test added successfully'
     });
   } catch (error) {
-    console.error('Add test error:', error);
+    logger.error('Add test error:', { error: error.message, stack: error.stack, context: 'Add test' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -395,7 +396,7 @@ const addRevisionToChapter = async (req, res) => {
       message: 'Revision recorded successfully'
     });
   } catch (error) {
-    console.error('Add revision error:', error);
+    logger.error('Add revision error:', { error: error.message, stack: error.stack, context: 'Add revision' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -471,7 +472,7 @@ const bulkUpdateChapters = async (req, res) => {
       updatedCount
     });
   } catch (error) {
-    console.error('Bulk update chapters error:', error);
+    logger.error('Bulk update chapters error:', { error: error.message, stack: error.stack, context: 'Bulk update chapters' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -528,7 +529,7 @@ const getBookStats = async (req, res) => {
       data: stats
     });
   } catch (error) {
-    console.error('Get book stats error:', error);
+    logger.error('Get book stats error:', { error: error.message, stack: error.stack, context: 'Get book stats' });
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -575,7 +576,7 @@ const getStudyRecommendations = async (req, res) => {
       data: recommendations
     });
   } catch (error) {
-    console.error('Get recommendations error:', error);
+    logger.error('Get recommendations error:', { error: error.message, stack: error.stack, context: 'Get recommendations' });
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -642,7 +643,7 @@ const addChapterToBook = async (req, res) => {
       message: 'Chapter added successfully'
     });
   } catch (error) {
-    console.error('Add chapter error:', error);
+    logger.error('Add chapter error:', { error: error.message, stack: error.stack, context: 'Add chapter' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -704,7 +705,7 @@ const removeChapterFromBook = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Remove chapter error:', error);
+    logger.error('Remove chapter error:', { error: error.message, stack: error.stack, context: 'Remove chapter' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -771,7 +772,7 @@ const linkChapterToSyllabus = async (req, res) => {
       message: 'Chapter linked to syllabus item successfully'
     });
   } catch (error) {
-    console.error('Link chapter to syllabus error:', error);
+    logger.error('Link chapter to syllabus error:', { error: error.message, stack: error.stack, context: 'Link chapter to syllabus' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'

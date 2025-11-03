@@ -8,6 +8,7 @@ const {
   getStudyAnalytics
 } = require('../controllers/studySessionController');
 const { protect } = require('../middleware/auth');
+const { studySessionValidations, queryValidations, commonValidations } = require('../middleware/validation');
 
 const router = express.Router();
 
@@ -15,14 +16,14 @@ const router = express.Router();
 router.use(protect);
 
 router.route('/')
-  .post(createStudySession)
-  .get(getStudySessions);
+  .post(studySessionValidations.create, createStudySession)
+  .get(queryValidations.pagination, getStudySessions);
 
 router.get('/analytics', getStudyAnalytics);
 
 router.route('/:id')
-  .get(getStudySession)
-  .put(updateStudySession)
-  .delete(deleteStudySession);
+  .get(commonValidations.mongoId, getStudySession)
+  .put(studySessionValidations.update, updateStudySession)
+  .delete(commonValidations.mongoId, deleteStudySession);
 
 module.exports = router;

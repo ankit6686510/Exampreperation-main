@@ -12,14 +12,14 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { token, user, isLoading, isInitialized } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    // If we have a token but no user data, fetch the profile
-    if (token && !user && !isLoading) {
+    // If we have a token but no user data and haven't initialized, fetch the profile
+    if (token && !user && !isInitialized && !isLoading) {
       dispatch(fetchProfile());
     }
-  }, [token, user, isLoading, dispatch]);
+  }, [token, user, isInitialized, isLoading, dispatch]);
 
   // Show loading while checking authentication
-  if (token && !isInitialized && isLoading) {
+  if (token && !isInitialized) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">

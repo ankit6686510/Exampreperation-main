@@ -3,6 +3,7 @@ const GroupStats = require('../models/GroupStats');
 const StudyGroup = require('../models/StudyGroup');
 const StudySession = require('../models/StudySession');
 const User = require('../models/User');
+const logger = require('../config/logger');
 
 // @desc    Get user's progress sharing settings for a group
 // @route   GET /api/groups/:groupId/progress-settings
@@ -42,7 +43,7 @@ const getProgressSettings = async (req, res) => {
       data: { progressSettings }
     });
   } catch (error) {
-    console.error('Get progress settings error:', error);
+    logger.error('Get progress settings error:', { error: error.message, stack: error.stack, context: 'Get progress settings' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch progress settings'
@@ -99,7 +100,7 @@ const updateProgressSettings = async (req, res) => {
       data: { progressSettings }
     });
   } catch (error) {
-    console.error('Update progress settings error:', error);
+    logger.error('Update progress settings error:', { error: error.message, stack: error.stack, context: 'Update progress settings' });
     res.status(500).json({
       success: false,
       message: 'Failed to update progress settings'
@@ -147,7 +148,7 @@ const getGroupProgressDashboard = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get group progress dashboard error:', error);
+    logger.error('Get group progress dashboard error:', { error: error.message, stack: error.stack, context: 'Get group progress dashboard' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch group progress dashboard'
@@ -196,7 +197,7 @@ const getGroupLeaderboards = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get group leaderboards error:', error);
+    logger.error('Get group leaderboards error:', { error: error.message, stack: error.stack, context: 'Get group leaderboards' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch group leaderboards'
@@ -265,7 +266,7 @@ const requestStudyPartnership = async (req, res) => {
       data: { partnerId, status: 'pending' }
     });
   } catch (error) {
-    console.error('Request study partnership error:', error);
+    logger.error('Request study partnership error:', { error: error.message, stack: error.stack, context: 'Request study partnership' });
     res.status(500).json({
       success: false,
       message: 'Failed to send partnership request'
@@ -353,7 +354,7 @@ const respondToPartnership = async (req, res) => {
       data: { requesterId, status }
     });
   } catch (error) {
-    console.error('Respond to partnership error:', error);
+    logger.error('Respond to partnership error:', { error: error.message, stack: error.stack, context: 'Respond to partnership' });
     res.status(500).json({
       success: false,
       message: 'Failed to respond to partnership request'
@@ -402,7 +403,7 @@ const getStudyPartners = async (req, res) => {
       data: { partners, pendingRequests }
     });
   } catch (error) {
-    console.error('Get study partners error:', error);
+    logger.error('Get study partners error:', { error: error.message, stack: error.stack, context: 'Get study partners' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch study partners'

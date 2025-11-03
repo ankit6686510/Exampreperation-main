@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { logout } from '@/redux/slices/authSlice';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { NotificationBell } from './NotificationBell';
 import { useState } from 'react';
 
 interface SidebarProps {
@@ -51,7 +52,7 @@ const Sidebar = ({ mobile = false, onNavigate }: SidebarProps) => {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 z-50 w-64 h-screen bg-[hsl(var(--sidebar-background))] border-r border-[hsl(var(--sidebar-border))] shadow-lg overflow-y-auto">
+    <aside className="fixed left-0 top-0 z-50 w-64 h-screen bg-[hsl(var(--sidebar-background))] border-r border-[hsl(var(--sidebar-border))] shadow-lg overflow-hidden">
       {/* Background Image Pattern */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -88,7 +89,7 @@ const Sidebar = ({ mobile = false, onNavigate }: SidebarProps) => {
             </div>
           </div>
           
-          <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-[hsl(var(--sidebar-primary))] bg-opacity-10 border border-[hsl(var(--sidebar-primary))] border-opacity-20">
+          <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-[hsl(var(--sidebar-primary))] bg-opacity-10 border border-[hsl(var(--sidebar-primary))] border-opacity-20">
             <div className="w-8 h-8 rounded-full bg-[hsl(var(--sidebar-primary))] bg-opacity-20 flex items-center justify-center">
               <User className="h-4 w-4 text-[hsl(var(--sidebar-foreground))]" />
             </div>
@@ -98,10 +99,11 @@ const Sidebar = ({ mobile = false, onNavigate }: SidebarProps) => {
               </p>
               <p className="text-xs text-[hsl(var(--sidebar-foreground))] opacity-75">Student</p>
             </div>
+            <NotificationBell />
           </div>
         </div>
 
-        <nav className="flex-1 p-4 bg-[hsl(var(--sidebar-background))]">
+        <nav className="flex-1 p-4 bg-[hsl(var(--sidebar-background))] overflow-y-auto overscroll-contain">
           <div className="space-y-6">
             {/* Main Navigation */}
             <div className="space-y-1">

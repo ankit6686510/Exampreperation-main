@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axiosInstance from '@/api/axiosInstance';
+import type { ApiError } from '@/types/api';
 
 export interface Test {
   _id?: string;
@@ -134,9 +135,9 @@ export const fetchBooks = createAsyncThunk(
       
       const response = await axiosInstance.get(`/books?${params.toString()}`);
       return response.data;
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch books';
-      return rejectWithValue((error as { response?: { data?: { message?: string } } })?.response?.data?.message || errorMessage);
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to fetch books');
     }
   }
 );
@@ -147,8 +148,9 @@ export const fetchBook = createAsyncThunk(
     try {
       const response = await axiosInstance.get(`/books/${id}`);
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch book');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to fetch book');
     }
   }
 );
@@ -171,8 +173,9 @@ export const addBook = createAsyncThunk(
     try {
       const response = await axiosInstance.post('/books', bookData);
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to add book');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to add book');
     }
   }
 );
@@ -183,8 +186,9 @@ export const updateBook = createAsyncThunk(
     try {
       const response = await axiosInstance.put(`/books/${id}`, data);
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update book');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to update book');
     }
   }
 );
@@ -195,8 +199,9 @@ export const deleteBook = createAsyncThunk(
     try {
       await axiosInstance.delete(`/books/${id}`);
       return id;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to delete book');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to delete book');
     }
   }
 );
@@ -215,8 +220,9 @@ export const updateChapter = createAsyncThunk(
     try {
       const response = await axiosInstance.put(`/books/${bookId}/chapters/${chapterIndex}`, data);
       return { bookId, chapterIndex, chapter: response.data.data };
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update chapter');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to update chapter');
     }
   }
 );
@@ -235,8 +241,9 @@ export const addTestToChapter = createAsyncThunk(
     try {
       const response = await axiosInstance.post(`/books/${bookId}/chapters/${chapterIndex}/tests`, testData);
       return { bookId, chapterIndex, test: response.data.data };
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to add test');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to add test');
     }
   }
 );
@@ -255,8 +262,9 @@ export const addRevisionToChapter = createAsyncThunk(
     try {
       const response = await axiosInstance.post(`/books/${bookId}/chapters/${chapterIndex}/revisions`, revisionData);
       return { bookId, chapterIndex, revision: response.data.data };
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to add revision');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to add revision');
     }
   }
 );
@@ -281,8 +289,9 @@ export const bulkUpdateChapters = createAsyncThunk(
         actionData
       });
       return { bookId, updatedCount: response.data.updatedCount };
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to bulk update chapters');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to bulk update chapters');
     }
   }
 );
@@ -293,8 +302,9 @@ export const fetchBookStats = createAsyncThunk(
     try {
       const response = await axiosInstance.get(`/books/${bookId}/stats`);
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch book stats');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to fetch book stats');
     }
   }
 );
@@ -305,8 +315,9 @@ export const fetchStudyRecommendations = createAsyncThunk(
     try {
       const response = await axiosInstance.get(`/books/${bookId}/recommendations`);
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch study recommendations');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to fetch study recommendations');
     }
   }
 );
@@ -323,8 +334,9 @@ export const addChapterToBook = createAsyncThunk(
     try {
       const response = await axiosInstance.post(`/books/${bookId}/chapters`, chapterData);
       return { bookId, chapter: response.data.data };
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to add chapter');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to add chapter');
     }
   }
 );
@@ -341,8 +353,9 @@ export const removeChapterFromBook = createAsyncThunk(
     try {
       await axiosInstance.delete(`/books/${bookId}/chapters/${chapterIndex}`);
       return { bookId, chapterIndex };
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to remove chapter');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to remove chapter');
     }
   }
 );
@@ -363,8 +376,9 @@ export const linkChapterToSyllabus = createAsyncThunk(
         syllabusItemId
       });
       return { bookId, chapterIndex, syllabusItemId };
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to link chapter to syllabus');
+    } catch (error) {
+      const apiError = error as ApiError;
+      return rejectWithValue(apiError.message || 'Failed to link chapter to syllabus');
     }
   }
 );

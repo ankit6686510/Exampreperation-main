@@ -217,6 +217,10 @@ const studyRoomSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  reminderSent: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

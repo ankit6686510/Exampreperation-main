@@ -1,6 +1,7 @@
 const Syllabus = require('../models/Syllabus');
 const Book = require('../models/Book');
 const StudySession = require('../models/StudySession');
+const logger = require('../config/logger');
 
 // Get all syllabus items (tree structure)
 const getSyllabus = async (req, res) => {
@@ -29,7 +30,7 @@ const getSyllabus = async (req, res) => {
       data: syllabusTree,
     });
   } catch (error) {
-    console.error('Get syllabus error:', error);
+    logger.error('Get syllabus error:', { error: error.message, stack: error.stack, context: 'Get syllabus' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch syllabus',
@@ -82,7 +83,7 @@ const getSyllabusStats = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get syllabus stats error:', error);
+    logger.error('Get syllabus stats error:', { error: error.message, stack: error.stack, context: 'Get syllabus stats' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch syllabus statistics',
@@ -119,7 +120,7 @@ const getSyllabusItem = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get syllabus item error:', error);
+    logger.error('Get syllabus item error:', { error: error.message, stack: error.stack, context: 'Get syllabus item' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch syllabus item',
@@ -186,7 +187,7 @@ const createSyllabusItem = async (req, res) => {
       message: 'Syllabus item created successfully',
     });
   } catch (error) {
-    console.error('Create syllabus item error:', error);
+    logger.error('Create syllabus item error:', { error: error.message, stack: error.stack, context: 'Create syllabus item' });
     res.status(500).json({
       success: false,
       message: 'Failed to create syllabus item',
@@ -266,7 +267,7 @@ const updateSyllabusItem = async (req, res) => {
       message: 'Syllabus item updated successfully',
     });
   } catch (error) {
-    console.error('Update syllabus item error:', error);
+    logger.error('Update syllabus item error:', { error: error.message, stack: error.stack, context: 'Update syllabus item' });
     res.status(500).json({
       success: false,
       message: 'Failed to update syllabus item',
@@ -313,7 +314,7 @@ const deleteSyllabusItem = async (req, res) => {
       message: 'Syllabus item deleted successfully',
     });
   } catch (error) {
-    console.error('Delete syllabus item error:', error);
+    logger.error('Delete syllabus item error:', { error: error.message, stack: error.stack, context: 'Delete syllabus item' });
     res.status(500).json({
       success: false,
       message: 'Failed to delete syllabus item',
@@ -411,7 +412,7 @@ const bulkUpdateSyllabus = async (req, res) => {
       message: `${result.modifiedCount} items updated successfully`,
     });
   } catch (error) {
-    console.error('Bulk update syllabus error:', error);
+    logger.error('Bulk update syllabus error:', { error: error.message, stack: error.stack, context: 'Bulk update syllabus' });
     res.status(500).json({
       success: false,
       message: 'Failed to bulk update syllabus items',
@@ -489,7 +490,7 @@ const getStudyRecommendations = async (req, res) => {
       data: recommendations,
     });
   } catch (error) {
-    console.error('Get study recommendations error:', error);
+    logger.error('Get study recommendations error:', { error: error.message, stack: error.stack, context: 'Get study recommendations' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch study recommendations',
@@ -536,7 +537,7 @@ const linkBooksToSyllabus = async (req, res) => {
       message: 'Books linked successfully',
     });
   } catch (error) {
-    console.error('Link books to syllabus error:', error);
+    logger.error('Link books to syllabus error:', { error: error.message, stack: error.stack, context: 'Link books to syllabus' });
     res.status(500).json({
       success: false,
       message: 'Failed to link books to syllabus',

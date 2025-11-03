@@ -1,4 +1,5 @@
 const MonthlyPlan = require('../models/MonthlyPlan');
+const logger = require('../config/logger');
 
 // @desc    Get monthly plans for user
 // @route   GET /api/goals/monthly?month=MM&year=YYYY
@@ -22,7 +23,7 @@ const getMonthlyPlans = async (req, res) => {
       data: monthlyPlans
     });
   } catch (error) {
-    console.error('Get monthly plans error:', error);
+    logger.error('Get monthly plans error:', { error: error.message, stack: error.stack, context: 'Get monthly plans' });
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -57,7 +58,7 @@ const getMonthlyPlan = async (req, res) => {
       data: monthlyPlan
     });
   } catch (error) {
-    console.error('Get monthly plan error:', error);
+    logger.error('Get monthly plan error:', { error: error.message, stack: error.stack, context: 'Get monthly plan' });
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -98,7 +99,7 @@ const createMonthlyPlan = async (req, res) => {
       data: monthlyPlan
     });
   } catch (error) {
-    console.error('Create monthly plan error:', error);
+    logger.error('Create monthly plan error:', { error: error.message, stack: error.stack, context: 'Create monthly plan' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -142,7 +143,7 @@ const updateMonthlyPlan = async (req, res) => {
       data: monthlyPlan
     });
   } catch (error) {
-    console.error('Update monthly plan error:', error);
+    logger.error('Update monthly plan error:', { error: error.message, stack: error.stack, context: 'Update monthly plan' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -182,7 +183,7 @@ const updateProgress = async (req, res) => {
       data: monthlyPlan
     });
   } catch (error) {
-    console.error('Update progress error:', error);
+    logger.error('Update progress error:', { error: error.message, stack: error.stack, context: 'Update progress' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -219,7 +220,7 @@ const deleteMonthlyPlan = async (req, res) => {
       message: 'Monthly plan deleted successfully'
     });
   } catch (error) {
-    console.error('Delete monthly plan error:', error);
+    logger.error('Delete monthly plan error:', { error: error.message, stack: error.stack, context: 'Delete monthly plan' });
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -263,7 +264,7 @@ const getMonthlyStats = async (req, res) => {
       data: stats
     });
   } catch (error) {
-    console.error('Get monthly stats error:', error);
+    logger.error('Get monthly stats error:', { error: error.message, stack: error.stack, context: 'Get monthly stats' });
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -282,7 +283,7 @@ const syncWithCalendar = async (req, res) => {
       message: 'Google Calendar integration coming soon'
     });
   } catch (error) {
-    console.error('Calendar sync error:', error);
+    logger.error('Calendar sync error:', { error: error.message, stack: error.stack, context: 'Calendar sync' });
     res.status(500).json({
       success: false,
       message: 'Server error'

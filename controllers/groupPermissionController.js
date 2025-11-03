@@ -2,6 +2,7 @@ const GroupPermission = require('../models/GroupPermission');
 const StudyGroup = require('../models/StudyGroup');
 const GroupActivity = require('../models/GroupActivity');
 const User = require('../models/User');
+const logger = require('../config/logger');
 
 // @desc    Request permission to view someone's data
 // @route   POST /api/groups/:groupId/permissions/request
@@ -122,7 +123,7 @@ const requestPermission = async (req, res) => {
       data: { permission }
     });
   } catch (error) {
-    console.error('Request permission error:', error);
+    logger.error('Request permission error:', { error: error.message, stack: error.stack, context: 'Request permission' });
     res.status(500).json({
       success: false,
       message: 'Failed to send permission request'
@@ -209,7 +210,7 @@ const respondToPermission = async (req, res) => {
       data: { permission }
     });
   } catch (error) {
-    console.error('Respond to permission error:', error);
+    logger.error('Respond to permission error:', { error: error.message, stack: error.stack, context: 'Respond to permission' });
     res.status(500).json({
       success: false,
       message: 'Failed to process permission request'
@@ -242,7 +243,7 @@ const getPendingPermissions = async (req, res) => {
       data: { permissions, type }
     });
   } catch (error) {
-    console.error('Get pending permissions error:', error);
+    logger.error('Get pending permissions error:', { error: error.message, stack: error.stack, context: 'Get pending permissions' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch pending permissions'
@@ -301,7 +302,7 @@ const getGroupPermissions = async (req, res) => {
       data: { permissions }
     });
   } catch (error) {
-    console.error('Get group permissions error:', error);
+    logger.error('Get group permissions error:', { error: error.message, stack: error.stack, context: 'Get group permissions' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch group permissions'
@@ -362,7 +363,7 @@ const updatePermission = async (req, res) => {
       data: { permission }
     });
   } catch (error) {
-    console.error('Update permission error:', error);
+    logger.error('Update permission error:', { error: error.message, stack: error.stack, context: 'Update permission' });
     res.status(500).json({
       success: false,
       message: 'Failed to update permission'
@@ -405,7 +406,7 @@ const revokePermission = async (req, res) => {
       message: 'Permission revoked successfully'
     });
   } catch (error) {
-    console.error('Revoke permission error:', error);
+    logger.error('Revoke permission error:', { error: error.message, stack: error.stack, context: 'Revoke permission' });
     res.status(500).json({
       success: false,
       message: 'Failed to revoke permission'
@@ -461,7 +462,7 @@ const logPermissionView = async (req, res) => {
       message: 'View logged successfully'
     });
   } catch (error) {
-    console.error('Log permission view error:', error);
+    logger.error('Log permission view error:', { error: error.message, stack: error.stack, context: 'Log permission view' });
     res.status(500).json({
       success: false,
       message: 'Failed to log view'
@@ -511,7 +512,7 @@ const getPermissionHistory = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get permission history error:', error);
+    logger.error('Get permission history error:', { error: error.message, stack: error.stack, context: 'Get permission history' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch permission history'
@@ -547,7 +548,7 @@ const checkPermission = async (req, res) => {
       data: { canView }
     });
   } catch (error) {
-    console.error('Check permission error:', error);
+    logger.error('Check permission error:', { error: error.message, stack: error.stack, context: 'Check permission' });
     res.status(500).json({
       success: false,
       message: 'Failed to check permission'
