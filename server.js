@@ -1,45 +1,86 @@
 const express = require('express');
+const http = require('http');
+const socketIo = require('socket.io');
 const path = require('path');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 const connectDB = require('./config/database');
+const logger = require('./config/logger');
+const requestLogger = require('./middleware/requestLogger');
+const { initSentry, Sentry } = require('./config/sentry');
+const { initRedis, closeRedis } = require('./config/redis');
+const { initializeSocketHandlers } = require('./config/socket');
+const { scheduleStudyRoomReminders, stopScheduler } = require('./utils/notificationScheduler');
 
-// Load env vars
 dotenv.config();
 
-// Connect to database
+logger.info('Starting application...');
+
 connectDB();
+initRedis();
+scheduleStudyRoomReminders();
 
 const app = express();
+const server = http.createServer(app);
 
-// Security middleware
-app.use(helmet());
-
-// Rate limiting - configurable via environment variables
-const limiter = rateLimit({
-  windowMs: (parseInt(process.env.RATE_LIMIT_WINDOW) || 15) * 60 * 1000, // minutes to milliseconds
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || (process.env.NODE_ENV === 'production' ? 100 : 1000), // limit each IP to max requests per windowMs
-  message: {
-    success: false,
-    message: 'Too many requests from this IP, please try again later.'
-  }
-});
-app.use('/api/', limiter);
-
-// CORS - Deployment friendly configuration
 const getAllowedOrigins = () => {
   if (process.env.CORS_ORIGIN) {
-    // Support multiple origins separated by commas
     return process.env.CORS_ORIGIN.split(',').map(origin => origin.trim());
   }
   
-  // Fallback for development if no CORS_ORIGIN is set
   return process.env.NODE_ENV === 'production' 
     ? ['https://your-frontend-domain.com'] 
     : ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082'];
 };
+
+const io = socketIo(server, {
+  cors: {
+    origin: getAllowedOrigins(),
+    credentials: true,
+    methods: ['GET', 'POST']
+  },
+  transports: ['websocket', 'polling']
+});
+
+global.io = io;
+
+initializeSocketHandlers(io);
+
+const sentryInstance = initSentry(app);
+
+if (sentryInstance) {
+  app.use(Sentry.Handlers.requestHandler());
+  app.use(Sentry.Handlers.tracingHandler());
+}
+
+app.use(helmet());
+
+const limiter = rateLimit({
+  windowMs: (parseInt(process.env.RATE_LIMIT_WINDOW) || 15) * 60 * 1000,
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || (process.env.NODE_ENV === 'production' ? 100 : 1000),
+  message: {
+    success: false,
+    message: 'Too many requests from this IP, please try again later.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use('/api/', limiter);
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: {
+    success: false,
+    message: 'Too many authentication attempts, please try again after 15 minutes.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true
+});
 
 const corsOptions = {
   origin: getAllowedOrigins(),
@@ -51,11 +92,12 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Body parser middleware - configurable via environment variables
+app.use(requestLogger);
+
 app.use(express.json({ limit: process.env.MAX_FILE_SIZE || '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-// Route files
 const auth = require('./routes/auth');
 const books = require('./routes/books');
 const dailyGoals = require('./routes/dailyGoals');
@@ -66,9 +108,13 @@ const syllabus = require('./routes/syllabus');
 const upscResources = require('./routes/upscResources');
 const newspaperAnalysis = require('./routes/newspaperAnalysis');
 const studyGroups = require('./routes/studyGroups');
+const groupProgress = require('./routes/groupProgress');
+const studyRooms = require('./routes/studyRooms');
+const sharedResources = require('./routes/sharedResources');
+const resources = require('./routes/resources');
+const notifications = require('./routes/notifications');
 
-// Mount routers
-app.use('/api/auth', auth);
+app.use('/api/auth', authLimiter, auth);
 app.use('/api/books', books);
 app.use('/api/goals/daily', dailyGoals);
 app.use('/api/daily-goals', simpleDailyGoals);
@@ -78,12 +124,15 @@ app.use('/api/syllabus', syllabus);
 app.use('/api/upsc-resources', upscResources);
 app.use('/api/newspaper-analysis', newspaperAnalysis);
 app.use('/api/groups', studyGroups);
+app.use('/api/group-progress', groupProgress);
+app.use('/api/study-rooms', studyRooms);
+app.use('/api/shared-resources', sharedResources);
+app.use('/api/resources', resources);
+app.use('/api/notifications', notifications);
 
-// Serve static files from the React app in production
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, 'client/dist')));
   
-  // Catch all handler: send back React's index.html file for any non-API routes
   app.get('*', (req, res) => {
     if (!req.originalUrl.startsWith('/api')) {
       res.sendFile(path.join(__dirname, 'client/dist', 'index.html'));
@@ -91,7 +140,6 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-// Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     success: true,
@@ -104,7 +152,6 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Handle 404 errors
 app.all('*', (req, res) => {
   res.status(404).json({
     success: false,
@@ -112,11 +159,33 @@ app.all('*', (req, res) => {
   });
 });
 
-// Error handler middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
+if (sentryInstance) {
+  app.use(Sentry.Handlers.errorHandler());
+}
 
-  // Mongoose bad ObjectId
+app.use((err, req, res, next) => {
+  logger.logError(err, {
+    method: req.method,
+    url: req.url,
+    ip: req.ip,
+    userId: req.user?.id
+  });
+
+  if (sentryInstance) {
+    Sentry.captureException(err, {
+      user: req.user ? { id: req.user.id, email: req.user.email } : undefined,
+      tags: {
+        endpoint: req.originalUrl,
+        method: req.method,
+      },
+      extra: {
+        body: req.body,
+        query: req.query,
+        params: req.params,
+      },
+    });
+  }
+
   if (err.name === 'CastError') {
     return res.status(400).json({
       success: false,
@@ -124,7 +193,6 @@ app.use((err, req, res, next) => {
     });
   }
 
-  // Mongoose duplicate key
   if (err.code === 11000) {
     const message = 'Duplicate field value entered';
     return res.status(400).json({
@@ -133,7 +201,6 @@ app.use((err, req, res, next) => {
     });
   }
 
-  // Mongoose validation error
   if (err.name === 'ValidationError') {
     const message = Object.values(err.errors).map(val => val.message).join(', ');
     return res.status(400).json({
@@ -142,7 +209,6 @@ app.use((err, req, res, next) => {
     });
   }
 
-  // JWT errors
   if (err.name === 'JsonWebTokenError') {
     return res.status(401).json({
       success: false,
@@ -163,47 +229,84 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Handle unhandled promise rejections
 process.on('unhandledRejection', (err, promise) => {
-  console.log(`Error: ${err.message}`);
-  // Close server & exit process
-  server.close(() => {
-    process.exit(1);
+  logger.error('Unhandled Promise Rejection:', {
+    message: err.message,
+    stack: err.stack,
+    promise
   });
+  
+  if (sentryInstance) {
+    Sentry.captureException(err, {
+      tags: { type: 'unhandledRejection' }
+    });
+  }
+  
+  gracefulShutdown('UNHANDLED_REJECTION');
 });
 
-// Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
-  console.log(`Error: ${err.message}`);
-  console.log('Shutting down due to uncaught exception');
-  process.exit(1);
+  logger.error('Uncaught Exception:', {
+    message: err.message,
+    stack: err.stack
+  });
+  
+  if (sentryInstance) {
+    Sentry.captureException(err, {
+      tags: { type: 'uncaughtException' }
+    });
+  }
+  
+  logger.error('Shutting down due to uncaught exception');
+  gracefulShutdown('UNCAUGHT_EXCEPTION');
 });
 
 const PORT = process.env.PORT || 5000;
 
-const server = app.listen(PORT, () => {
-  console.log(`
-╔══════════════════════════════════════════════════════════════╗
-║                                                              ║
-║  🚀  Exam Planner API Server Running              ║
-║                                                              ║
-║  📍 Port: ${PORT}                                               ║
-║  🌍 Mode: ${process.env.NODE_ENV || 'development'}                                        ║
-║  📅 Started: ${new Date().toLocaleString()}                    ║
-║                                                              ║
-║  📖 API Documentation:                                       ║
-║  • Auth: http://localhost:${PORT}/api/auth                      ║
-║  • Books: http://localhost:${PORT}/api/books                    ║
-║  • Daily Goals: http://localhost:${PORT}/api/goals/daily        ║
-║  • Monthly Plans: http://localhost:${PORT}/api/goals/monthly    ║
-║  • Study Sessions: http://localhost:${PORT}/api/sessions        ║
-║  • Syllabus: http://localhost:${PORT}/api/syllabus             ║
-║  • UPSC Resources: http://localhost:${PORT}/api/upsc-resources  ║
-║  • Newspaper Analysis: http://localhost:${PORT}/api/newspaper-analysis ║
-║  • Health Check: http://localhost:${PORT}/api/health           ║
-║                                                              ║
-╚══════════════════════════════════════════════════════════════╝
-  `);
+server.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+  logger.info('Server started successfully', {
+    port: PORT,
+    environment: process.env.NODE_ENV || 'development',
+    nodeVersion: process.version
+  });
 });
+
+const gracefulShutdown = async (signal) => {
+  logger.info(`${signal} received. Starting graceful shutdown...`);
+  
+  stopScheduler();
+  
+  io.close(() => {
+    logger.info('Socket.IO server closed');
+  });
+  
+  server.close(async () => {
+    logger.info('HTTP server closed');
+    
+    try {
+      await closeRedis();
+    } catch (err) {
+      logger.error('Error closing Redis:', err);
+    }
+    
+    if (sentryInstance) {
+      Sentry.close(2000).then(() => {
+        logger.info('Sentry client closed');
+        process.exit(0);
+      });
+    } else {
+      process.exit(0);
+    }
+  });
+  
+  setTimeout(() => {
+    logger.error('Forced shutdown after timeout');
+    process.exit(1);
+  }, 10000);
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 module.exports = app;

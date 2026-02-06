@@ -1,11 +1,19 @@
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
+const logger = require('../config/logger');
 
 // Generate JWT Token
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE || '30d',
+    expiresIn: process.env.JWT_EXPIRE || '15m',
+  });
+};
+
+// Generate Refresh Token
+const generateRefreshToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET, {
+    expiresIn: '7d',
   });
 };
 
@@ -14,7 +22,11 @@ const updateUserActivity = async (userId) => {
   try {
     await User.findByIdAndUpdate(userId, { lastActiveAt: new Date() });
   } catch (error) {
-    console.error('Error updating user activity:', error);
+    logger.error('Error updating user activity:', {
+      userId,
+      error: error.message,
+      stack: error.stack
+    });
   }
 };
 
@@ -43,11 +55,20 @@ const register = async (req, res) => {
       examDate
     });
 
-    // Generate token
+    // Generate tokens
     const token = generateToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
 
     // Update user activity
     await updateUserActivity(user._id);
+
+    // Set httpOnly cookie for refresh token
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
 
     res.status(201).json({
       success: true,
@@ -69,7 +90,7 @@ const register = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Register error:', error);
+    logger.error('Register error:', { error: error.message, stack: error.stack, context: 'Register' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error during registration'
@@ -110,11 +131,20 @@ const login = async (req, res) => {
       });
     }
 
-    // Generate token
+    // Generate tokens
     const token = generateToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
 
     // Update user activity
     await updateUserActivity(user._id);
+
+    // Set httpOnly cookie for refresh token
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
 
     res.status(200).json({
       success: true,
@@ -136,10 +166,71 @@ const login = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Login error:', error);
+    logger.error('Login error:', { error: error.message, stack: error.stack, context: 'Login' });
     res.status(500).json({
       success: false,
       message: 'Server error during login'
+    });
+  }
+};
+
+// @desc    Refresh access token
+// @route   POST /api/auth/refresh
+// @access  Public
+const refreshToken = async (req, res) => {
+  try {
+    const { refreshToken } = req.cookies;
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: 'Refresh token not found'
+      });
+    }
+
+    // Verify refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
+
+    // Generate new access token
+    const newToken = generateToken(decoded.id);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        token: newToken
+      }
+    });
+
+  } catch (error) {
+    logger.error('Refresh token error:', { error: error.message, stack: error.stack, context: 'Refresh token' });
+    res.status(401).json({
+      success: false,
+      message: 'Invalid or expired refresh token'
+    });
+  }
+};
+
+// @desc    Logout user
+// @route   POST /api/auth/logout
+// @access  Private
+const logout = async (req, res) => {
+  try {
+    // Clear refresh token cookie
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Logged out successfully'
+    });
+  } catch (error) {
+    logger.error('Logout error:', { error: error.message, stack: error.stack, context: 'Logout' });
+    res.status(500).json({
+      success: false,
+      message: 'Server error during logout'
     });
   }
 };
@@ -174,7 +265,7 @@ const getMe = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get me error:', error);
+    logger.error('Get me error:', { error: error.message, stack: error.stack, context: 'Get me' });
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -229,7 +320,7 @@ const updateProfile = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Update profile error:', error);
+    logger.error('Update profile error:', { error: error.message, stack: error.stack, context: 'Update profile' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -272,7 +363,7 @@ const changePassword = async (req, res) => {
       message: 'Password changed successfully'
     });
   } catch (error) {
-    console.error('Change password error:', error);
+    logger.error('Change password error:', { error: error.message, stack: error.stack, context: 'Change password' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -323,7 +414,7 @@ const updateProgressStats = async (req, res) => {
       data: { progressStats: user.progressStats }
     });
   } catch (error) {
-    console.error('Update progress error:', error);
+    logger.error('Update progress error:', { error: error.message, stack: error.stack, context: 'Update progress' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -334,6 +425,8 @@ const updateProgressStats = async (req, res) => {
 module.exports = {
   register,
   login,
+  refreshToken,
+  logout,
   getMe,
   updateProfile,
   changePassword,

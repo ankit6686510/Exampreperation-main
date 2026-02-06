@@ -16,39 +16,35 @@ const {
   linkChapterToSyllabus
 } = require('../controllers/bookController');
 const { protect } = require('../middleware/auth');
+const { bookValidations, queryValidations, commonValidations } = require('../middleware/validation');
+const { cache, invalidateCacheForUser } = require('../middleware/cache');
 
 const router = express.Router();
 
-// Protect all routes
 router.use(protect);
 
-// Main book routes
 router
   .route('/')
-  .get(getBooks)
-  .post(createBook);
+  .get(cache(300), queryValidations.pagination, queryValidations.search, getBooks)
+  .post(invalidateCacheForUser, bookValidations.create, createBook);
 
 router
   .route('/:id')
-  .get(getBook)
-  .put(updateBook)
-  .delete(deleteBook);
+  .get(cache(300), commonValidations.mongoId, getBook)
+  .put(invalidateCacheForUser, commonValidations.mongoId, updateBook)
+  .delete(invalidateCacheForUser, commonValidations.mongoId, deleteBook);
 
-// Book statistics and recommendations
-router.get('/:id/stats', getBookStats);
-router.get('/:id/recommendations', getStudyRecommendations);
+router.get('/:id/stats', cache(300), commonValidations.mongoId, getBookStats);
+router.get('/:id/recommendations', cache(300), commonValidations.mongoId, getStudyRecommendations);
 
-// Chapter management routes
-router.post('/:id/chapters', addChapterToBook);
-router.put('/:id/chapters/:chapterIndex', updateChapter);
-router.delete('/:id/chapters/:chapterIndex', removeChapterFromBook);
-router.patch('/:id/chapters/bulk', bulkUpdateChapters);
+router.post('/:id/chapters', invalidateCacheForUser, addChapterToBook);
+router.put('/:id/chapters/:chapterIndex', invalidateCacheForUser, updateChapter);
+router.delete('/:id/chapters/:chapterIndex', invalidateCacheForUser, removeChapterFromBook);
+router.patch('/:id/chapters/bulk', invalidateCacheForUser, bulkUpdateChapters);
 
-// Chapter tests and revisions
-router.post('/:id/chapters/:chapterIndex/tests', addTestToChapter);
-router.post('/:id/chapters/:chapterIndex/revisions', addRevisionToChapter);
+router.post('/:id/chapters/:chapterIndex/tests', invalidateCacheForUser, addTestToChapter);
+router.post('/:id/chapters/:chapterIndex/revisions', invalidateCacheForUser, addRevisionToChapter);
 
-// Syllabus integration
-router.post('/:id/chapters/:chapterIndex/link-syllabus', linkChapterToSyllabus);
+router.post('/:id/chapters/:chapterIndex/link-syllabus', invalidateCacheForUser, linkChapterToSyllabus);
 
 module.exports = router;

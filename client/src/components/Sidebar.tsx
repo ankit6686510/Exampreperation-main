@@ -1,9 +1,10 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Home, BookOpen, Target, Calendar, Clock, FileText, TrendingUp, User, LogOut } from 'lucide-react';
+import { Home, BookOpen, Target, Calendar, Clock, FileText, TrendingUp, User, LogOut, Users, Video, Share2, Trophy } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { logout } from '@/redux/slices/authSlice';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { NotificationBell } from './NotificationBell';
 import { useState } from 'react';
 
 interface SidebarProps {
@@ -35,12 +36,23 @@ const Sidebar = ({ mobile = false, onNavigate }: SidebarProps) => {
     { icon: Calendar, label: 'Monthly Plan', path: '/monthly-plan' },
     { icon: Clock, label: 'Study Sessions', path: '/study-sessions' },
     { icon: TrendingUp, label: 'Progress Analytics', path: '/advanced-progress' },
+  ];
+
+  // Peer Study Features
+  const peerStudyItems = [
+    { icon: Users, label: 'Study Groups', path: '/study-groups' },
+    { icon: Video, label: 'Study Rooms', path: '/study-rooms' },
+    { icon: Share2, label: 'Resources', path: '/shared-resources' },
+    { icon: Trophy, label: 'Challenges', path: '/challenges' },
+  ];
+
+  const profileItems = [
     { icon: User, label: 'Profile', path: '/profile' },
     { icon: LogOut, label: 'Logout', path: '/logout', action: 'logout' },
   ];
 
   return (
-    <aside className="fixed left-0 top-0 z-50 w-64 h-screen bg-[hsl(var(--sidebar-background))] border-r border-[hsl(var(--sidebar-border))] shadow-lg overflow-y-auto">
+    <aside className="fixed left-0 top-0 z-50 w-64 h-screen bg-[hsl(var(--sidebar-background))] border-r border-[hsl(var(--sidebar-border))] shadow-lg overflow-hidden">
       {/* Background Image Pattern */}
       <div className="absolute inset-0 opacity-10 pointer-events-none">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -77,7 +89,7 @@ const Sidebar = ({ mobile = false, onNavigate }: SidebarProps) => {
             </div>
           </div>
           
-          <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-[hsl(var(--sidebar-primary))] bg-opacity-10 border border-[hsl(var(--sidebar-primary))] border-opacity-20">
+          <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-[hsl(var(--sidebar-primary))] bg-opacity-10 border border-[hsl(var(--sidebar-primary))] border-opacity-20">
             <div className="w-8 h-8 rounded-full bg-[hsl(var(--sidebar-primary))] bg-opacity-20 flex items-center justify-center">
               <User className="h-4 w-4 text-[hsl(var(--sidebar-foreground))]" />
             </div>
@@ -87,19 +99,84 @@ const Sidebar = ({ mobile = false, onNavigate }: SidebarProps) => {
               </p>
               <p className="text-xs text-[hsl(var(--sidebar-foreground))] opacity-75">Student</p>
             </div>
+            <NotificationBell />
           </div>
         </div>
 
-        <nav className="flex-1 p-4 bg-[hsl(var(--sidebar-background))]">
-          <div className="space-y-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              
-              // Handle logout action differently
-              if (item.action === 'logout') {
+        <nav className="flex-1 p-4 bg-[hsl(var(--sidebar-background))] overflow-y-auto overscroll-contain">
+          <div className="space-y-6">
+            {/* Main Navigation */}
+            <div className="space-y-1">
+              {navItems.map((item) => {
+                const Icon = item.icon;
                 return (
-                  <div key={item.path} className="pt-2 mt-2 border-t border-white border-opacity-20">
-                    <AlertDialog>
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => mobile && onNavigate?.()}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group ${
+                        isActive
+                          ? 'bg-white bg-opacity-20 text-[hsl(var(--sidebar-foreground))] shadow-sm border border-white border-opacity-30'
+                          : 'text-[hsl(var(--sidebar-foreground))] opacity-80 hover:opacity-100 hover:bg-white hover:bg-opacity-10'
+                      }`
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <Icon className={`h-4 w-4 transition-all duration-200 ${isActive ? 'text-[hsl(var(--sidebar-foreground))]' : 'opacity-70 group-hover:opacity-90'}`} />
+                        {item.label}
+                      </>
+                    )}
+                  </NavLink>
+                );
+              })}
+            </div>
+
+            {/* Peer Study Section */}
+            <div>
+              <div className="px-3 mb-2">
+                <h3 className="text-xs font-semibold text-[hsl(var(--sidebar-foreground))] opacity-60 uppercase tracking-wider">
+                  Peer Study
+                </h3>
+              </div>
+              <div className="space-y-1">
+                {peerStudyItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => mobile && onNavigate?.()}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group ${
+                          isActive
+                            ? 'bg-white bg-opacity-20 text-[hsl(var(--sidebar-foreground))] shadow-sm border border-white border-opacity-30'
+                            : 'text-[hsl(var(--sidebar-foreground))] opacity-80 hover:opacity-100 hover:bg-white hover:bg-opacity-10'
+                        }`
+                      }
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <Icon className={`h-4 w-4 transition-all duration-200 ${isActive ? 'text-[hsl(var(--sidebar-foreground))]' : 'opacity-70 group-hover:opacity-90'}`} />
+                          {item.label}
+                        </>
+                      )}
+                    </NavLink>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Profile Section */}
+            <div className="pt-2 border-t border-white border-opacity-20">
+              {profileItems.map((item) => {
+                const Icon = item.icon;
+                
+                // Handle logout action differently
+                if (item.path === '/logout') {
+                  return (
+                    <AlertDialog key={item.path}>
                       <AlertDialogTrigger asChild>
                         <button className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 text-[hsl(var(--sidebar-foreground))] hover:bg-white hover:bg-opacity-15 w-full text-left group">
                           <Icon className="h-4 w-4 opacity-80 group-hover:opacity-100 transition-opacity" />
@@ -121,32 +198,32 @@ const Sidebar = ({ mobile = false, onNavigate }: SidebarProps) => {
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
-                  </div>
+                  );
+                }
+                
+                return (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => mobile && onNavigate?.()}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group ${
+                        isActive
+                          ? 'bg-white bg-opacity-20 text-[hsl(var(--sidebar-foreground))] shadow-sm border border-white border-opacity-30'
+                          : 'text-[hsl(var(--sidebar-foreground))] opacity-80 hover:opacity-100 hover:bg-white hover:bg-opacity-10'
+                      }`
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <Icon className={`h-4 w-4 transition-all duration-200 ${isActive ? 'text-[hsl(var(--sidebar-foreground))]' : 'opacity-70 group-hover:opacity-90'}`} />
+                        {item.label}
+                      </>
+                    )}
+                  </NavLink>
                 );
-              }
-              
-              return (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => mobile && onNavigate?.()}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group ${
-                      isActive
-                        ? 'bg-white bg-opacity-20 text-[hsl(var(--sidebar-foreground))] shadow-sm border border-white border-opacity-30'
-                        : 'text-[hsl(var(--sidebar-foreground))] opacity-80 hover:opacity-100 hover:bg-white hover:bg-opacity-10'
-                    }`
-                  }
-                >
-                  {({ isActive }) => (
-                    <>
-                      <Icon className={`h-4 w-4 transition-all duration-200 ${isActive ? 'text-[hsl(var(--sidebar-foreground))]' : 'opacity-70 group-hover:opacity-90'}`} />
-                      {item.label}
-                    </>
-                  )}
-                </NavLink>
-              );
-            })}
+              })}
+            </div>
           </div>
         </nav>
       </div>

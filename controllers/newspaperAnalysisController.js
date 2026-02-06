@@ -1,4 +1,5 @@
 const NewspaperAnalysis = require('../models/NewspaperAnalysis');
+const logger = require('../config/logger');
 
 // Get all newspaper analyses with filters
 const getNewspaperAnalyses = async (req, res) => {
@@ -44,7 +45,7 @@ const getNewspaperAnalyses = async (req, res) => {
       data: analyses,
     });
   } catch (error) {
-    console.error('Get newspaper analyses error:', error);
+    logger.error('Get newspaper analyses error:', { error: error.message, stack: error.stack, context: 'Get newspaper analyses' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch newspaper analyses',
@@ -72,7 +73,7 @@ const getNewspaperAnalysis = async (req, res) => {
       data: analysis,
     });
   } catch (error) {
-    console.error('Get newspaper analysis error:', error);
+    logger.error('Get newspaper analysis error:', { error: error.message, stack: error.stack, context: 'Get newspaper analysis' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch newspaper analysis',
@@ -101,7 +102,7 @@ const getAnalysisByDate = async (req, res) => {
       data: analyses,
     });
   } catch (error) {
-    console.error('Get analysis by date error:', error);
+    logger.error('Get analysis by date error:', { error: error.message, stack: error.stack, context: 'Get analysis by date' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch analysis for date',
@@ -170,7 +171,7 @@ const createOrUpdateAnalysis = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('Create/Update newspaper analysis error:', error);
+    logger.error('Create/Update newspaper analysis error:', { error: error.message, stack: error.stack, context: 'Create/Update newspaper analysis' });
     res.status(500).json({
       success: false,
       message: 'Failed to save newspaper analysis',
@@ -207,7 +208,7 @@ const addArticle = async (req, res) => {
       message: 'Article added successfully',
     });
   } catch (error) {
-    console.error('Add article error:', error);
+    logger.error('Add article error:', { error: error.message, stack: error.stack, context: 'Add article' });
     res.status(500).json({
       success: false,
       message: 'Failed to add article',
@@ -260,7 +261,7 @@ const updateArticle = async (req, res) => {
       message: 'Article updated successfully',
     });
   } catch (error) {
-    console.error('Update article error:', error);
+    logger.error('Update article error:', { error: error.message, stack: error.stack, context: 'Update article' });
     res.status(500).json({
       success: false,
       message: 'Failed to update article',
@@ -294,7 +295,7 @@ const deleteArticle = async (req, res) => {
       message: 'Article deleted successfully',
     });
   } catch (error) {
-    console.error('Delete article error:', error);
+    logger.error('Delete article error:', { error: error.message, stack: error.stack, context: 'Delete article' });
     res.status(500).json({
       success: false,
       message: 'Failed to delete article',
@@ -350,7 +351,7 @@ const getMonthlyStats = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Get monthly stats error:', error);
+    logger.error('Get monthly stats error:', { error: error.message, stack: error.stack, context: 'Get monthly stats' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch monthly statistics',
@@ -370,7 +371,7 @@ const getTimeline = async (req, res) => {
       data: timeline,
     });
   } catch (error) {
-    console.error('Get timeline error:', error);
+    logger.error('Get timeline error:', { error: error.message, stack: error.stack, context: 'Get timeline' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch timeline data',
@@ -390,7 +391,7 @@ const getCategoryTrends = async (req, res) => {
       data: trends,
     });
   } catch (error) {
-    console.error('Get category trends error:', error);
+    logger.error('Get category trends error:', { error: error.message, stack: error.stack, context: 'Get category trends' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch category trends',
@@ -408,7 +409,7 @@ const getRevisionReminders = async (req, res) => {
       data: reminders,
     });
   } catch (error) {
-    console.error('Get revision reminders error:', error);
+    logger.error('Get revision reminders error:', { error: error.message, stack: error.stack, context: 'Get revision reminders' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch revision reminders',
@@ -446,7 +447,7 @@ const generateMonthlyCompilation = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Generate monthly compilation error:', error);
+    logger.error('Generate monthly compilation error:', { error: error.message, stack: error.stack, context: 'Generate monthly compilation' });
     res.status(500).json({
       success: false,
       message: 'Failed to generate monthly compilation',
@@ -488,7 +489,7 @@ const toggleBookmark = async (req, res) => {
       message: article.isBookmarked ? 'Article bookmarked' : 'Bookmark removed',
     });
   } catch (error) {
-    console.error('Toggle bookmark error:', error);
+    logger.error('Toggle bookmark error:', { error: error.message, stack: error.stack, context: 'Toggle bookmark' });
     res.status(500).json({
       success: false,
       message: 'Failed to toggle bookmark',
@@ -544,7 +545,7 @@ const getBookmarkedArticles = async (req, res) => {
       data: bookmarkedArticles,
     });
   } catch (error) {
-    console.error('Get bookmarked articles error:', error);
+    logger.error('Get bookmarked articles error:', { error: error.message, stack: error.stack, context: 'Get bookmarked articles' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch bookmarked articles',
@@ -635,7 +636,7 @@ const searchArticles = async (req, res) => {
       query,
     });
   } catch (error) {
-    console.error('Search articles error:', error);
+    logger.error('Search articles error:', { error: error.message, stack: error.stack, context: 'Search articles' });
     res.status(500).json({
       success: false,
       message: 'Failed to search articles',

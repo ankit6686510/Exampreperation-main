@@ -17,6 +17,7 @@ import StudySessions from "./pages/StudySessions/StudySessions";
 import SyllabusTracker from "./pages/SyllabusTracker/SyllabusTracker";
 import AdvancedProgress from "./pages/AdvancedProgress/AdvancedProgress";
 import Profile from "./pages/Profile/Profile";
+import Notifications from "./pages/Notifications/Notifications";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
               }
             >
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/notifications" element={<Notifications />} />
               <Route path="/books" element={<Books />} />
               <Route path="/goals/daily" element={<DailyGoals />} />
               <Route path="/goals/monthly" element={<MonthlyPlan />} />

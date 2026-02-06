@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import Sidebar from './Sidebar';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+import { NotificationBell } from './NotificationBell';
+import { useSocket } from '@/hooks/useSocket';
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  useSocket();
 
   return (
     <div className="flex min-h-screen w-full bg-background">
@@ -25,7 +28,9 @@ const Layout = () => {
             </div>
             <h1 className="text-lg font-bold text-foreground tracking-tight">Examprep</h1>
           </div>
-          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="lg:hidden hover:bg-muted transition-colors">
                 <Menu className="h-6 w-6" />
@@ -35,7 +40,8 @@ const Layout = () => {
             <SheetContent side="left" className="p-0 w-64 border-r border-border">
               <Sidebar mobile onNavigate={() => setSidebarOpen(false)} />
             </SheetContent>
-          </Sheet>
+            </Sheet>
+          </div>
         </header>
 
         {/* Main Content */}

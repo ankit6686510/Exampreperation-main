@@ -1,4 +1,5 @@
 const UpscResource = require('../models/UpscResource');
+const logger = require('../config/logger');
 
 // Get all UPSC resources with filters
 const getUpscResources = async (req, res) => {
@@ -26,7 +27,7 @@ const getUpscResources = async (req, res) => {
       data: resources,
     });
   } catch (error) {
-    console.error('Get UPSC resources error:', error);
+    logger.error('Get UPSC resources error:', { error: error.message, stack: error.stack, context: 'Get UPSC resources' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch UPSC resources',
@@ -44,7 +45,7 @@ const getSubjectStats = async (req, res) => {
       data: stats,
     });
   } catch (error) {
-    console.error('Get subject stats error:', error);
+    logger.error('Get subject stats error:', { error: error.message, stack: error.stack, context: 'Get subject stats' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch subject statistics',
@@ -73,7 +74,7 @@ const getUpscResource = async (req, res) => {
       data: resource,
     });
   } catch (error) {
-    console.error('Get UPSC resource error:', error);
+    logger.error('Get UPSC resource error:', { error: error.message, stack: error.stack, context: 'Get UPSC resource' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch UPSC resource',
@@ -127,7 +128,7 @@ const createUpscResource = async (req, res) => {
       message: 'UPSC resource created successfully',
     });
   } catch (error) {
-    console.error('Create UPSC resource error:', error);
+    logger.error('Create UPSC resource error:', { error: error.message, stack: error.stack, context: 'Create UPSC resource' });
     res.status(500).json({
       success: false,
       message: 'Failed to create UPSC resource',
@@ -173,7 +174,7 @@ const updateUpscResource = async (req, res) => {
       message: 'UPSC resource updated successfully',
     });
   } catch (error) {
-    console.error('Update UPSC resource error:', error);
+    logger.error('Update UPSC resource error:', { error: error.message, stack: error.stack, context: 'Update UPSC resource' });
     res.status(500).json({
       success: false,
       message: 'Failed to update UPSC resource',
@@ -233,7 +234,7 @@ const updateChapterStatus = async (req, res) => {
       message: 'Chapter updated successfully',
     });
   } catch (error) {
-    console.error('Update chapter status error:', error);
+    logger.error('Update chapter status error:', { error: error.message, stack: error.stack, context: 'Update chapter status' });
     res.status(500).json({
       success: false,
       message: 'Failed to update chapter status',
@@ -265,7 +266,7 @@ const deleteUpscResource = async (req, res) => {
       message: 'UPSC resource deleted successfully',
     });
   } catch (error) {
-    console.error('Delete UPSC resource error:', error);
+    logger.error('Delete UPSC resource error:', { error: error.message, stack: error.stack, context: 'Delete UPSC resource' });
     res.status(500).json({
       success: false,
       message: 'Failed to delete UPSC resource',
@@ -330,7 +331,7 @@ const importUpscTemplate = async (req, res) => {
       message: `${createdResources.length} resources imported successfully`,
     });
   } catch (error) {
-    console.error('Import UPSC template error:', error);
+    logger.error('Import UPSC template error:', { error: error.message, stack: error.stack, context: 'Import UPSC template' });
     res.status(500).json({
       success: false,
       message: 'Failed to import UPSC template',
@@ -367,7 +368,7 @@ const getTemplates = async (req, res) => {
       data: groupedTemplates,
     });
   } catch (error) {
-    console.error('Get templates error:', error);
+    logger.error('Get templates error:', { error: error.message, stack: error.stack, context: 'Get templates' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch templates',
@@ -436,7 +437,7 @@ const bulkUpdateResources = async (req, res) => {
       message: `${result.modifiedCount} resources updated successfully`,
     });
   } catch (error) {
-    console.error('Bulk update resources error:', error);
+    logger.error('Bulk update resources error:', { error: error.message, stack: error.stack, context: 'Bulk update resources' });
     res.status(500).json({
       success: false,
       message: 'Failed to bulk update resources',

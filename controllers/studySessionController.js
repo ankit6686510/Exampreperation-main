@@ -1,5 +1,6 @@
 const StudySession = require('../models/StudySession');
 const User = require('../models/User');
+const logger = require('../config/logger');
 
 // @desc    Create new study session
 // @route   POST /api/sessions
@@ -35,7 +36,7 @@ const createStudySession = async (req, res) => {
       data: studySession
     });
   } catch (error) {
-    console.error('Create study session error:', error);
+    logger.error('Create study session error:', { error: error.message, stack: error.stack, context: 'Create study session' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -80,7 +81,7 @@ const getStudySessions = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get study sessions error:', error);
+    logger.error('Get study sessions error:', { error: error.message, stack: error.stack, context: 'Get study sessions' });
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -110,7 +111,7 @@ const getStudySession = async (req, res) => {
       data: session
     });
   } catch (error) {
-    console.error('Get study session error:', error);
+    logger.error('Get study session error:', { error: error.message, stack: error.stack, context: 'Get study session' });
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -142,7 +143,7 @@ const updateStudySession = async (req, res) => {
       data: session
     });
   } catch (error) {
-    console.error('Update study session error:', error);
+    logger.error('Update study session error:', { error: error.message, stack: error.stack, context: 'Update study session' });
     res.status(500).json({
       success: false,
       message: error.message || 'Server error'
@@ -172,7 +173,7 @@ const deleteStudySession = async (req, res) => {
       message: 'Study session deleted successfully'
     });
   } catch (error) {
-    console.error('Delete study session error:', error);
+    logger.error('Delete study session error:', { error: error.message, stack: error.stack, context: 'Delete study session' });
     res.status(500).json({
       success: false,
       message: 'Server error'
@@ -245,7 +246,7 @@ const getStudyAnalytics = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get study analytics error:', error);
+    logger.error('Get study analytics error:', { error: error.message, stack: error.stack, context: 'Get study analytics' });
     res.status(500).json({
       success: false,
       message: 'Server error'

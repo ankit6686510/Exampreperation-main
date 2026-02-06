@@ -3,9 +3,9 @@ const GroupPermission = require('../models/GroupPermission');
 const GroupActivity = require('../models/GroupActivity');
 const User = require('../models/User');
 
-// @desc    Get all public study groups
+// @desc    Get discoverable study groups (groups created by others)
 // @route   GET /api/groups
-// @access  Public
+// @access  Private
 const getPublicGroups = async (req, res) => {
   try {
     const { 
@@ -17,10 +17,14 @@ const getPublicGroups = async (req, res) => {
     } = req.query;
 
     const skip = (page - 1) * limit;
-    let query = { privacy: 'public', isActive: true };
+    let query = { 
+      privacy: 'public', 
+      isActive: true
+      // Removed exclusion so creators can see their own groups in discover
+    };
 
     // Add exam type filter
-    if (examType) {
+    if (examType && examType !== 'all') {
       query.examTypes = examType;
     }
 
@@ -75,7 +79,7 @@ const getPublicGroups = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get public groups error:', error);
+    logger.error('Get public groups error:', { error: error.message, stack: error.stack, context: 'Get public groups' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch groups'
@@ -83,14 +87,19 @@ const getPublicGroups = async (req, res) => {
   }
 };
 
-// @desc    Get user's study groups
+// @desc    Get user's study groups (groups where user is a member - admin or regular member)
 // @route   GET /api/groups/my-groups
 // @access  Private
 const getUserGroups = async (req, res) => {
   try {
     const groups = await StudyGroup.find({
-      'members.user': req.user.id,
-      'members.isActive': true,
+      $or: [
+        { admin: req.user.id }, // Groups owned by current user
+        { 
+          'members.user': req.user.id,
+          'members.isActive': true
+        } // Groups where user is an active member
+      ],
       isActive: true
     })
     .populate('admin', 'name profilePicture')
@@ -102,7 +111,7 @@ const getUserGroups = async (req, res) => {
       data: { groups }
     });
   } catch (error) {
-    console.error('Get user groups error:', error);
+    logger.error('Get user groups error:', { error: error.message, stack: error.stack, context: 'Get user groups' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch your groups'
@@ -154,7 +163,7 @@ const getStudyGroup = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get study group error:', error);
+    logger.error('Get study group error:', { error: error.message, stack: error.stack, context: 'Get study group' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch group details'
@@ -230,7 +239,7 @@ const createStudyGroup = async (req, res) => {
       data: { group }
     });
   } catch (error) {
-    console.error('Create study group error:', error);
+    logger.error('Create study group error:', { error: error.message, stack: error.stack, context: 'Create study group' });
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to create study group'
@@ -293,7 +302,7 @@ const updateStudyGroup = async (req, res) => {
       data: { group }
     });
   } catch (error) {
-    console.error('Update study group error:', error);
+    logger.error('Update study group error:', { error: error.message, stack: error.stack, context: 'Update study group' });
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to update study group'
@@ -360,7 +369,7 @@ const joinStudyGroup = async (req, res) => {
       data: { groupId: group._id }
     });
   } catch (error) {
-    console.error('Join study group error:', error);
+    logger.error('Join study group error:', { error: error.message, stack: error.stack, context: 'Join study group' });
     res.status(500).json({
       success: false,
       message: 'Failed to join study group'
@@ -418,7 +427,7 @@ const leaveStudyGroup = async (req, res) => {
       message: 'Successfully left the study group'
     });
   } catch (error) {
-    console.error('Leave study group error:', error);
+    logger.error('Leave study group error:', { error: error.message, stack: error.stack, context: 'Leave study group' });
     res.status(500).json({
       success: false,
       message: 'Failed to leave study group'
@@ -448,16 +457,51 @@ const deleteStudyGroup = async (req, res) => {
       });
     }
 
-    // Soft delete (mark as inactive)
+    // Import models for cascade delete
+    const StudyRoom = require('../models/StudyRoom');
+    const SharedResource = require('../models/SharedResource');
+const logger = require('../config/logger');
+
+    // Cascade delete: Remove all associated study rooms
+    await StudyRoom.updateMany(
+      { group: group._id },
+      { isActive: false }
+    );
+
+    // Cascade delete: Remove all associated shared resources
+    await SharedResource.updateMany(
+      { groupId: group._id },
+      { isActive: false }
+    );
+
+    // Cascade delete: Remove all group activities
+    await GroupActivity.updateMany(
+      { group: group._id },
+      { visibility: 'private' } // Hide activities instead of deleting for audit trail
+    );
+
+    // Soft delete the group (mark as inactive)
     group.isActive = false;
     await group.save();
 
+    // Create final activity log
+    await GroupActivity.createActivity({
+      group: group._id,
+      user: req.user.id,
+      activityType: 'member_left', // Using existing enum value
+      data: {
+        title: 'Group Deleted',
+        description: `${req.user.name} deleted the group "${group.name}"`
+      },
+      visibility: 'private'
+    });
+
     res.status(200).json({
       success: true,
-      message: 'Study group deleted successfully'
+      message: 'Study group and all associated content deleted successfully'
     });
   } catch (error) {
-    console.error('Delete study group error:', error);
+    logger.error('Delete study group error:', { error: error.message, stack: error.stack, context: 'Delete study group' });
     res.status(500).json({
       success: false,
       message: 'Failed to delete study group'
@@ -495,7 +539,7 @@ const getGroupLeaderboard = async (req, res) => {
       data: { leaderboard, period }
     });
   } catch (error) {
-    console.error('Get group leaderboard error:', error);
+    logger.error('Get group leaderboard error:', { error: error.message, stack: error.stack, context: 'Get group leaderboard' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch leaderboard'
@@ -533,7 +577,7 @@ const getGroupActivities = async (req, res) => {
       data: { activities }
     });
   } catch (error) {
-    console.error('Get group activities error:', error);
+    logger.error('Get group activities error:', { error: error.message, stack: error.stack, context: 'Get group activities' });
     res.status(500).json({
       success: false,
       message: 'Failed to fetch group activities'
